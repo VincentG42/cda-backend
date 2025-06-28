@@ -3,19 +3,23 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private UserService $userService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return response()->json(User::all());
+        return response()->json($this->userService->getAllUsers());
     }
 
     /**
@@ -33,7 +37,7 @@ class UserController extends Controller
             'has_to_change_password' => 'boolean',
         ]);
         $validated['password'] = Hash::make($validated['password']);
-        $user = User::create($validated);
+        $user = $this->userService->createUser($validated);
         return response()->json($user, 201);
     }
 
@@ -42,7 +46,12 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = User::findOrFail($id);
+        $user = $this->userService->getUserById($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+        }
+
         return response()->json($user);
     }
 
@@ -51,9 +60,8 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $user = User::findOrFail($id);
         $validated = $request->validate([
-            'email' => ['email', Rule::unique('users')->ignore($user->id)],
+            'email' => ['email', Rule::unique('users')->ignore($id)],
             'password' => 'nullable|min:6',
             'user_type_id' => 'exists:user_types,id',
             'lastname' => 'sometimes|required',
@@ -61,12 +69,14 @@ class UserController extends Controller
             'licence_number' => 'nullable',
             'has_to_change_password' => 'boolean',
         ]);
-        if (isset($validated['password'])) {
-            $validated['password'] = Hash::make($validated['password']);
-        } else {
-            unset($validated['password']);
+
+        $success = $this->userService->updateUser($id, $validated);
+
+        if (!$success) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
-        $user->update($validated);
+
+        $user = $this->userService->getUserById($id);
         return response()->json($user);
     }
 
@@ -75,12 +85,12 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        $user = User::findOrFail($id);
+        $success = $this->userService->deleteUser($id);
 
-        if ($user->userType && strtolower($user->userType->name) === 'admin') {
-            return response()->json(['message' => 'Impossible de supprimer un administrateur.'], 403);
+        if (!$success) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
-        $user->delete();
+
         return response()->json(['message' => 'Utilisateur supprimé']);
     }
 }
