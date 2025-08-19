@@ -31,4 +31,7 @@ Route::middleware(['auth:sanctum', 'can:access-admin-panel'])->group(function ()
     Route::post('/user-types', [UserTypeController::class, 'store']);
     Route::put('/user-types/{id}', [UserTypeController::class, 'update']);
     Route::delete('/user-types/{id}', [UserTypeController::class, 'destroy']);
+
+    // Team
+    Route::apiResource('/teams', TeamController::class);
 });
