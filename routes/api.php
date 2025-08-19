@@ -13,7 +13,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'can:access-admin-panel'])->group(function () {
 
     //Logout
     Route::post('/logout', [AuthController::class, 'logout']);

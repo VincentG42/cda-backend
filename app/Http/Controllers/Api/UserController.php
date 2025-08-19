@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\UserService;
+use App\DTOs\CreateUserDTO;
+use App\DTOs\UpdateUserDTO;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -19,6 +22,7 @@ class UserController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', User::class);
         return response()->json($this->userService->getAllUsers());
     }
 
@@ -27,17 +31,10 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
-            'user_type_id' => 'required|exists:user_types,id',
-            'lastname' => 'required',
-            'firstname' => 'required',
-            'licence_number' => 'nullable',
-            'has_to_change_password' => 'boolean',
-        ]);
-        $validated['password'] = Hash::make($validated['password']);
-        $user = $this->userService->createUser($validated);
+        $this->authorize('create', User::class);
+        $dto = CreateUserDTO::fromRequest($request);
+        $user = $this->userService->createUser($dto);
+
         return response()->json($user, 201);
     }
 
@@ -52,6 +49,8 @@ class UserController extends Controller
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
 
+        $this->authorize('view', $user);
+
         return response()->json($user);
     }
 
@@ -60,17 +59,21 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'email' => ['email', Rule::unique('users')->ignore($id)],
-            'password' => 'nullable|min:6',
-            'user_type_id' => 'exists:user_types,id',
-            'lastname' => 'sometimes|required',
-            'firstname' => 'sometimes|required',
-            'licence_number' => 'nullable',
-            'has_to_change_password' => 'boolean',
-        ]);
+        $user = $this->userService->getUserById($id);
 
-        $success = $this->userService->updateUser($id, $validated);
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+        }
+
+        $this->authorize('update', $user);
+
+        $dto = UpdateUserDTO::fromRequest($request, $id);
+
+        if (!$dto->hasData()) {
+            return response()->json(['message' => 'Aucune donnée à mettre à jour'], 400);
+        }
+
+        $success = $this->userService->updateUser($id, $dto);
 
         if (!$success) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
@@ -85,6 +88,14 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
+        $user = $this->userService->getUserById($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur non trouvé'], 404);
+        }
+
+        $this->authorize('delete', $user);
+
         $success = $this->userService->deleteUser($id);
 
         if (!$success) {

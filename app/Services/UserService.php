@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Repositories\UserRepositoryInterface;
 use App\Models\User;
+use App\DTOs\CreateUserDTO;
+use App\DTOs\UpdateUserDTO;
+use App\DTOs\LoginDTO;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 
@@ -23,18 +26,20 @@ class UserService
         return $this->userRepository->findWithUserType($id);
     }
 
-    public function createUser(array $data): User
+    public function createUser(CreateUserDTO $dto): User
     {
+        $data = $dto->toArray();
+
         // Logique métier : hash du mot de passe
-        if (isset($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        }
+        $data['password'] = Hash::make($data['password']);
 
         return $this->userRepository->create($data);
     }
 
-    public function updateUser(int $id, array $data): bool
+    public function updateUser(int $id, UpdateUserDTO $dto): bool
     {
+        $data = $dto->toArray();
+
         // Logique métier : hash du mot de passe si fourni
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']);
@@ -48,11 +53,11 @@ class UserService
         return $this->userRepository->delete($id);
     }
 
-    public function authenticateUser(string $email, string $password): ?User
+    public function authenticateUser(LoginDTO $dto): ?User
     {
-        $user = $this->userRepository->findByEmail($email);
+        $user = $this->userRepository->findByEmail($dto->email);
 
-        if (!$user || !Hash::check($password, $user->password)) {
+        if (!$user || !Hash::check($dto->password, $user->password)) {
             return null;
         }
 

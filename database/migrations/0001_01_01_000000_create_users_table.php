@@ -17,7 +17,6 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->unsignedBigInteger('user_type_id')->index();
-            $table->foreign('user_type_id')->references('id')->on('user_types');
             $table->string('lastname');
             $table->string('firstname');
             $table->string('licence_number')->nullable();

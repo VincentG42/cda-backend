@@ -10,6 +10,12 @@ class UserType extends Model
 {
     use HasFactory;
 
+    public const PLAYER = 'player';
+    public const COACH = 'coach';
+    public const STAFF = 'staff';
+    public const PRESIDENT = 'president';
+    public const ADMIN = 'admin';
+
     protected $fillable = ['name'];
 
     public function users(): HasMany
