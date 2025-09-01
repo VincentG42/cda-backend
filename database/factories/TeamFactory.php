@@ -23,6 +23,7 @@ class TeamFactory extends Factory
     public function definition(): array
     {
         return [
+            'name' => $this->faker->company(),
             'category_id' => Category::factory(),
             'coach_id' => User::factory(),
             'season_id' => Season::factory(),

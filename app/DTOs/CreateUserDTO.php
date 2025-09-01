@@ -35,7 +35,7 @@ class CreateUserDTO
             lastname: $validated['lastname'],
             firstname: $validated['firstname'],
             licenceNumber: $validated['licence_number'] ?? null,
-            hasToChangePassword: $validated['has_to_change_password'] ?? false
+            hasToChangePassword: $validated['has_to_change_password'] ?? true
         );
     }
 
