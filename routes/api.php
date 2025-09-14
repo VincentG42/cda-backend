@@ -7,10 +7,10 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\SeasonController;
 use App\Http\Controllers\Api\TeamController;
+use App\Http\Controllers\Api\EventController;
+use App\Http\Controllers\Api\EncounterController;
 
-Route::get('/test-api', function () {
-    return 'API OK';
-});
+
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -45,4 +45,11 @@ Route::post('/login', [AuthController::class, 'login']);
     Route::apiResource('teams', TeamController::class);
     Route::post('teams/{team}/players', [TeamController::class, 'addPlayer'])->name('teams.players.add');
     Route::delete('teams/{team}/players/{player}', [TeamController::class, 'removePlayer'])->name('teams.players.remove');
+
+    // Event
+    Route::apiResource('events', EventController::class);
+
+    // Encounter
+    Route::apiResource('encounters', EncounterController::class);
+    Route::post('encounters/{encounter}/stats', [EncounterController::class, 'uploadStats'])->name('encounters.stats.upload');
 // });
