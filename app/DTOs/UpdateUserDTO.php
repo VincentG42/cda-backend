@@ -44,19 +44,33 @@ class UpdateUserDTO
     {
         $data = [];
 
-        if ($this->email !== null) $data['email'] = $this->email;
-        if ($this->password !== null) $data['password'] = $this->password;
-        if ($this->userTypeId !== null) $data['user_type_id'] = $this->userTypeId;
-        if ($this->lastname !== null) $data['lastname'] = $this->lastname;
-        if ($this->firstname !== null) $data['firstname'] = $this->firstname;
-        if ($this->licenceNumber !== null) $data['licence_number'] = $this->licenceNumber;
-        if ($this->hasToChangePassword !== null) $data['has_to_change_password'] = $this->hasToChangePassword;
+        if ($this->email !== null) {
+            $data['email'] = $this->email;
+        }
+        if ($this->password !== null) {
+            $data['password'] = $this->password;
+        }
+        if ($this->userTypeId !== null) {
+            $data['user_type_id'] = $this->userTypeId;
+        }
+        if ($this->lastname !== null) {
+            $data['lastname'] = $this->lastname;
+        }
+        if ($this->firstname !== null) {
+            $data['firstname'] = $this->firstname;
+        }
+        if ($this->licenceNumber !== null) {
+            $data['licence_number'] = $this->licenceNumber;
+        }
+        if ($this->hasToChangePassword !== null) {
+            $data['has_to_change_password'] = $this->hasToChangePassword;
+        }
 
         return $data;
     }
 
     public function hasData(): bool
     {
-        return !empty($this->toArray());
+        return ! empty($this->toArray());
     }
 }

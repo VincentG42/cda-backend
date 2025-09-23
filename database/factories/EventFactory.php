@@ -22,6 +22,7 @@ class EventFactory extends Factory
     {
         $start = $this->faker->dateTimeBetween('-1 month', '+1 month');
         $end = (clone $start)->modify('+2 hours');
+
         return [
             'title' => $this->faker->sentence(3),
             'start_at' => $start,

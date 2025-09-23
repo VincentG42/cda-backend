@@ -17,6 +17,7 @@ class UserTypeController extends Controller
     public function show($id)
     {
         $userType = UserType::findOrFail($id);
+
         return response()->json($userType);
     }
 
@@ -26,6 +27,7 @@ class UserTypeController extends Controller
             'name' => 'required|string|unique:user_types,name',
         ]);
         $userType = UserType::create($validated);
+
         return response()->json($userType, 201);
     }
 
@@ -36,6 +38,7 @@ class UserTypeController extends Controller
             'name' => ['string', Rule::unique('user_types')->ignore($userType->id)],
         ]);
         $userType->update($validated);
+
         return response()->json($userType);
     }
 
@@ -43,6 +46,7 @@ class UserTypeController extends Controller
     {
         $userType = UserType::findOrFail($id);
         $userType->delete();
+
         return response()->json(['message' => 'Type utilisateur supprimé']);
     }
 }

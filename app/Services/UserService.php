@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Repositories\UserRepositoryInterface;
-use App\Models\User;
 use App\DTOs\CreateUserDTO;
-use App\DTOs\UpdateUserDTO;
 use App\DTOs\LoginDTO;
+use App\DTOs\UpdateUserDTO;
+use App\Models\User;
+use App\Repositories\UserRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 
@@ -57,7 +57,7 @@ class UserService
     {
         $user = $this->userRepository->findByEmail($dto->email);
 
-        if (!$user || !Hash::check($dto->password, $user->password)) {
+        if (! $user || ! Hash::check($dto->password, $user->password)) {
             return null;
         }
 

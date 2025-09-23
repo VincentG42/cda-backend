@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Team;
 use App\Models\Category;
-use App\Models\User;
 use App\Models\Season;
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

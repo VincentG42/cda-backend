@@ -30,12 +30,14 @@ class UserRepository implements UserRepositoryInterface
     public function update(int $id, array $data): bool
     {
         $user = User::find($id);
+
         return $user ? $user->update($data) : false;
     }
 
     public function delete(int $id): bool
     {
         $user = User::find($id);
+
         return $user ? $user->delete() : false;
     }
 

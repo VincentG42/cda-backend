@@ -1,0 +1,46 @@
+
+name: Laravel CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, sqlite, pdo, pdo_sqlite
+        coverage: none
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: vendor
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-composer-
+
+    - name: Install Dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Prepare Environment
+      run: |
+        cp .env.example .env
+        php artisan key:generate
+
+    - name: Check Code Style
+      run: vendor/bin/pint --test
+
+    - name: Run Tests
+      run: php artisan test
+

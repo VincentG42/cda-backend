@@ -15,7 +15,7 @@ class LoginDTO
     {
         $validated = $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string'
+            'password' => 'required|string',
         ]);
 
         return new self(
@@ -28,7 +28,7 @@ class LoginDTO
     {
         return [
             'email' => $this->email,
-            'password' => $this->password
+            'password' => $this->password,
         ];
     }
 }

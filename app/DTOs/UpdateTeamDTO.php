@@ -42,6 +42,6 @@ class UpdateTeamDTO
             'coach_id' => $this->coachId,
             'season_id' => $this->seasonId,
             'gender' => $this->gender,
-        ], fn($value) => $value !== null);
+        ], fn ($value) => $value !== null);
     }
 }

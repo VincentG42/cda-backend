@@ -18,7 +18,7 @@ class Event extends Model
         'author_id',
         'place',
         'additionnal_info',
-        'address'
+        'address',
     ];
 
     public function author(): BelongsTo

@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DTOs\LoginDTO;
 use App\Http\Controllers\Controller;
 use App\Services\UserService;
-use App\DTOs\LoginDTO;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -19,9 +18,9 @@ class AuthController extends Controller
         $dto = LoginDTO::fromRequest($request);
         $user = $this->userService->authenticateUser($dto);
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
-                'message' => 'Identifiants invalides'
+                'message' => 'Identifiants invalides',
             ], 401);
         }
 
@@ -29,7 +28,7 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $user,
-            'token' => $token
+            'token' => $token,
         ]);
     }
 
@@ -38,7 +37,7 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'message' => 'Déconnexion réussie'
+            'message' => 'Déconnexion réussie',
         ]);
     }
 

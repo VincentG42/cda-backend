@@ -11,6 +11,7 @@ class EventController extends Controller
 {
     /**
      * @group Événements
+     *
      * @summary Lister tous les événements
      *
      * Récupère une liste de tous les événements, triés par date de début la plus récente.

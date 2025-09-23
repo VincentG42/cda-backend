@@ -17,7 +17,7 @@ class Encounter extends Model
         'opponent',
         'is_at_home',
         'happens_at',
-        'is_victory'
+        'is_victory',
     ];
 
     public function season(): BelongsTo

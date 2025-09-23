@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\EncounterStat;
 use App\Models\Encounter;
+use App\Models\EncounterStat;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

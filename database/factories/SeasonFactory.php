@@ -21,8 +21,9 @@ class SeasonFactory extends Factory
     {
         $start = $this->faker->dateTimeBetween('-2 years', '+1 year');
         $end = (clone $start)->modify('+9 months');
+
         return [
-            'name' => 'Saison ' . $start->format('Y'),
+            'name' => 'Saison '.$start->format('Y'),
             'start_date' => $start->format('Y-m-d'),
             'end_date' => $end->format('Y-m-d'),
             'is_active' => $this->faker->boolean(70),

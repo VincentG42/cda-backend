@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\DTOs\CreateTeamDTO;
 use App\DTOs\UpdateTeamDTO;
+use App\Http\Controllers\Controller;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +18,7 @@ class TeamController extends Controller
     public function index(): JsonResponse
     {
         $teams = Team::with(['category', 'coach', 'season'])->get();
+
         return response()->json($teams);
     }
 
@@ -28,6 +29,7 @@ class TeamController extends Controller
     {
         $dto = CreateTeamDTO::fromRequest($request);
         $team = Team::create($dto->toArray());
+
         return response()->json($team, 201);
     }
 
@@ -37,6 +39,7 @@ class TeamController extends Controller
     public function show(Team $team): JsonResponse
     {
         $team->load(['category', 'coach', 'season', 'users']); // Changed to 'users'
+
         return response()->json($team);
     }
 
@@ -47,6 +50,7 @@ class TeamController extends Controller
     {
         $dto = UpdateTeamDTO::fromRequest($request);
         $team->update($dto->toArray());
+
         return response()->json($team);
     }
 
@@ -56,6 +60,7 @@ class TeamController extends Controller
     public function destroy(Team $team): JsonResponse
     {
         $team->delete();
+
         return response()->json(null, 204);
     }
 
@@ -84,7 +89,7 @@ class TeamController extends Controller
      */
     public function removePlayer(Team $team, User $player): JsonResponse
     {
-        if (!$team->users()->where('user_id', $player->id)->exists()) { // Changed to 'users'
+        if (! $team->users()->where('user_id', $player->id)->exists()) { // Changed to 'users'
             return response()->json(['message' => 'Player not found in team.'], 404);
         }
 

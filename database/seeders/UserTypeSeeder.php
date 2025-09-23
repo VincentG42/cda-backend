@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\UserType;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 
 class UserTypeSeeder extends Seeder
 {
@@ -12,10 +13,10 @@ class UserTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        UserType::firstOrCreate(['name' => UserType::ADMIN]);
         UserType::firstOrCreate(['name' => UserType::PLAYER]);
         UserType::firstOrCreate(['name' => UserType::COACH]);
         UserType::firstOrCreate(['name' => UserType::STAFF]);
         UserType::firstOrCreate(['name' => UserType::PRESIDENT]);
+        UserType::firstOrCreate(['name' => UserType::ADMIN]);
     }
 }

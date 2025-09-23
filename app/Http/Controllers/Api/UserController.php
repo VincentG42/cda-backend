@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Services\UserService;
 use App\DTOs\CreateUserDTO;
 use App\DTOs\UpdateUserDTO;
+use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\UserService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    use AuthorizesRequests;
+
     public function __construct(
         private UserService $userService
     ) {}
@@ -23,6 +24,7 @@ class UserController extends Controller
     public function index()
     {
         $this->authorize('viewAny', User::class);
+
         return response()->json($this->userService->getAllUsers());
     }
 
@@ -45,7 +47,7 @@ class UserController extends Controller
     {
         $user = $this->userService->getUserById($id);
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
 
@@ -61,7 +63,7 @@ class UserController extends Controller
     {
         $user = $this->userService->getUserById($id);
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
 
@@ -69,17 +71,18 @@ class UserController extends Controller
 
         $dto = UpdateUserDTO::fromRequest($request, $id);
 
-        if (!$dto->hasData()) {
+        if (! $dto->hasData()) {
             return response()->json(['message' => 'Aucune donnée à mettre à jour'], 400);
         }
 
         $success = $this->userService->updateUser($id, $dto);
 
-        if (!$success) {
+        if (! $success) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
 
         $user = $this->userService->getUserById($id);
+
         return response()->json($user);
     }
 
@@ -90,7 +93,7 @@ class UserController extends Controller
     {
         $user = $this->userService->getUserById($id);
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
 
@@ -98,7 +101,7 @@ class UserController extends Controller
 
         $success = $this->userService->deleteUser($id);
 
-        if (!$success) {
+        if (! $success) {
             return response()->json(['message' => 'Utilisateur non trouvé'], 404);
         }
 

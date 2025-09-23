@@ -17,7 +17,7 @@ class Team extends Model
         'category_id',
         'coach_id',
         'season_id',
-        'gender'
+        'gender',
     ];
 
     public function category(): BelongsTo

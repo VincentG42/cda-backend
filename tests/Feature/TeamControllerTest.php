@@ -8,7 +8,6 @@ use App\Models\Team;
 use App\Models\User;
 use App\Models\UserType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -38,7 +37,7 @@ class TeamControllerTest extends TestCase
         $response = $this->getJson('/api/teams');
 
         $response->assertStatus(200)
-                 ->assertJsonCount(3);
+            ->assertJsonCount(3);
     }
 
     public function test_can_create_team(): void
@@ -58,7 +57,7 @@ class TeamControllerTest extends TestCase
         $response = $this->postJson('/api/teams', $teamData);
 
         $response->assertStatus(201)
-                 ->assertJsonFragment(['name' => 'My Awesome Team']);
+            ->assertJsonFragment(['name' => 'My Awesome Team']);
 
         $this->assertDatabaseHas('teams', ['name' => 'My Awesome Team']);
     }
@@ -68,7 +67,7 @@ class TeamControllerTest extends TestCase
         $response = $this->postJson('/api/teams', ['name' => '']); // Missing required fields
 
         $response->assertStatus(422) // Validation error
-                 ->assertJsonValidationErrors(['category_id', 'coach_id', 'season_id']);
+            ->assertJsonValidationErrors(['category_id', 'coach_id', 'season_id']);
     }
 
     public function test_can_show_team(): void
@@ -78,7 +77,7 @@ class TeamControllerTest extends TestCase
         $response = $this->getJson("/api/teams/{$team->id}");
 
         $response->assertStatus(200)
-                 ->assertJsonFragment(['id' => $team->id]);
+            ->assertJsonFragment(['id' => $team->id]);
     }
 
     public function test_can_update_team(): void
@@ -89,7 +88,7 @@ class TeamControllerTest extends TestCase
         $response = $this->putJson("/api/teams/{$team->id}", ['name' => $newName]);
 
         $response->assertStatus(200)
-                 ->assertJsonFragment(['name' => $newName]);
+            ->assertJsonFragment(['name' => $newName]);
 
         $this->assertDatabaseHas('teams', ['id' => $team->id, 'name' => $newName]);
     }
