@@ -21,12 +21,15 @@ class TeamControllerTest extends TestCase
     {
         parent::setUp();
 
-        // Create user types
-        $adminUserType = UserType::factory()->create(['name' => 'admin']);
-        UserType::factory()->create(['name' => 'Player']);
+        // Create all user types
+        UserType::firstOrCreate(['name' => UserType::ADMIN]);
+        UserType::firstOrCreate(['name' => UserType::PRESIDENT]);
+        UserType::firstOrCreate(['name' => UserType::STAFF]);
+        UserType::firstOrCreate(['name' => UserType::COACH]);
+        UserType::firstOrCreate(['name' => UserType::PLAYER]);
 
         // Create and authenticate an admin user
-        $this->adminUser = User::factory()->create(['user_type_id' => $adminUserType->id]);
+        $this->adminUser = User::factory()->create(['user_type_id' => UserType::where('name', UserType::ADMIN)->first()->id]);
         Sanctum::actingAs($this->adminUser);
     }
 
@@ -144,5 +147,56 @@ class TeamControllerTest extends TestCase
             'team_id' => $team->id,
             'user_id' => $player->id,
         ]);
+    }
+
+    /** @test */
+    public function admin_can_assign_coach_to_team(): void
+    {
+        $team = Team::factory()->create();
+        $coach = User::factory()->for(UserType::where('name', UserType::COACH)->first(), 'userType')->create();
+
+        $response = $this->postJson("/api/teams/{$team->id}/coach", ['user_id' => $coach->id]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('teams', ['id' => $team->id, 'coach_id' => $coach->id]);
+    }
+
+    /** @test */
+    public function admin_cannot_assign_non_coach_user_as_coach(): void
+    {
+        $team = Team::factory()->create();
+        $player = User::factory()->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create();
+
+        $response = $this->postJson("/api/teams/{$team->id}/coach", ['user_id' => $player->id]);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment(['message' => 'User is not a coach.']);
+    }
+
+    /** @test */
+    public function admin_cannot_assign_coach_already_assigned(): void
+    {
+        $team = Team::factory()->create();
+        $coach = User::factory()->for(UserType::where('name', UserType::COACH)->first(), 'userType')->create();
+        $team->coach_id = $coach->id;
+        $team->save();
+
+        $response = $this->postJson("/api/teams/{$team->id}/coach", ['user_id' => $coach->id]);
+
+        $response->assertStatus(409);
+    }
+
+    /** @test */
+    public function non_admin_user_cannot_assign_coach(): void
+    {
+        $playerUser = User::factory()->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create();
+        Sanctum::actingAs($playerUser); // Authenticate as non-admin
+
+        $team = Team::factory()->create();
+        $coach = User::factory()->for(UserType::where('name', UserType::COACH)->first(), 'userType')->create();
+
+        $response = $this->postJson("/api/teams/{$team->id}/coach", ['user_id' => $coach->id]);
+
+        $response->assertStatus(403);
     }
 }

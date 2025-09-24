@@ -2,14 +2,16 @@
 
 namespace Tests\Feature\User;
 
+use App\Models\Team;
 use App\Models\User;
 use App\Models\UserType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class ListUsersTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithFaker;
 
     protected function setUp(): void
     {
@@ -41,7 +43,7 @@ class ListUsersTest extends TestCase
     public function admin_user_can_list_users(): void
     {
         $adminUser = User::factory()->for(UserType::where('name', UserType::ADMIN)->first(), 'userType')->create();
-        User::factory()->count(5)->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create();
+        User::factory()->count(5)->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create(['firstname' => $this->faker->firstName, 'lastname' => $this->faker->lastName]);
 
         $response = $this->actingAs($adminUser)->getJson('/api/users');
 
@@ -53,7 +55,7 @@ class ListUsersTest extends TestCase
     public function president_can_list_users(): void
     {
         $presidentUser = User::factory()->for(UserType::where('name', UserType::PRESIDENT)->first(), 'userType')->create();
-        User::factory()->count(5)->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create();
+        User::factory()->count(5)->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create(['firstname' => $this->faker->firstName, 'lastname' => $this->faker->lastName]);
 
         $response = $this->actingAs($presidentUser)->getJson('/api/users');
 
@@ -65,7 +67,7 @@ class ListUsersTest extends TestCase
     public function staff_can_list_users(): void
     {
         $staffUser = User::factory()->for(UserType::where('name', UserType::STAFF)->first(), 'userType')->create();
-        User::factory()->count(5)->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create();
+        User::factory()->count(5)->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create(['firstname' => $this->faker->firstName, 'lastname' => $this->faker->lastName]);
 
         $response = $this->actingAs($staffUser)->getJson('/api/users');
 
@@ -77,11 +79,92 @@ class ListUsersTest extends TestCase
     public function coach_can_list_users(): void
     {
         $coachUser = User::factory()->for(UserType::where('name', UserType::COACH)->first(), 'userType')->create();
-        User::factory()->count(5)->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create();
+        User::factory()->count(5)->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create(['firstname' => $this->faker->firstName, 'lastname' => $this->faker->lastName]);
 
         $response = $this->actingAs($coachUser)->getJson('/api/users');
 
         $response->assertStatus(200);
         $response->assertJsonCount(6);
+    }
+
+    /** @test */
+    public function admin_can_filter_users_by_name(): void
+    {
+        $adminUser = User::factory()->for(UserType::where('name', UserType::ADMIN)->first(), 'userType')->create();
+        User::factory()->create(['firstname' => 'John', 'lastname' => 'Doe', 'user_type_id' => UserType::where('name', UserType::PLAYER)->first()->id]);
+        User::factory()->create(['firstname' => 'Jane', 'lastname' => 'Smith', 'user_type_id' => UserType::where('name', UserType::PLAYER)->first()->id]);
+        User::factory()->create(['firstname' => 'Peter', 'lastname' => 'Jones', 'user_type_id' => UserType::where('name', UserType::COACH)->first()->id]);
+
+        $response = $this->actingAs($adminUser)->getJson('/api/users?name=John');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1);
+        $response->assertJsonFragment(['firstname' => 'John', 'lastname' => 'Doe']);
+    }
+
+    /** @test */
+    public function admin_can_filter_users_by_user_type(): void
+    {
+        $adminUser = User::factory()->for(UserType::where('name', UserType::ADMIN)->first(), 'userType')->create();
+        $playerUserType = UserType::where('name', UserType::PLAYER)->first();
+        $coachUserType = UserType::where('name', UserType::COACH)->first();
+
+        User::factory()->count(3)->for($playerUserType, 'userType')->create(['firstname' => $this->faker->firstName, 'lastname' => $this->faker->lastName]);
+        User::factory()->count(2)->for($coachUserType, 'userType')->create(['firstname' => $this->faker->firstName, 'lastname' => $this->faker->lastName]);
+
+        $response = $this->actingAs($adminUser)->getJson('/api/users?user_type_id=' . $playerUserType->id);
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(3);
+        $response->assertJsonFragment(['user_type_id' => $playerUserType->id]);
+    }
+
+    /** @test */
+    public function admin_can_filter_users_by_team(): void
+    {
+        $adminUser = User::factory()->for(UserType::where('name', UserType::ADMIN)->first(), 'userType')->create();
+        $teamA = Team::factory()->create();
+        $teamB = Team::factory()->create();
+
+        $user1 = User::factory()->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create(['firstname' => $this->faker->firstName, 'lastname' => $this->faker->lastName]);
+        $user2 = User::factory()->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create(['firstname' => $this->faker->firstName, 'lastname' => $this->faker->lastName]);
+        $user3 = User::factory()->for(UserType::where('name', UserType::PLAYER)->first(), 'userType')->create(['firstname' => $this->faker->firstName, 'lastname' => $this->faker->lastName]);
+
+        $user1->teams()->attach($teamA->id);
+        $user2->teams()->attach($teamA->id);
+        $user3->teams()->attach($teamB->id);
+
+        $response = $this->actingAs($adminUser)->getJson('/api/users?team_id=' . $teamA->id);
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(2);
+        $response->assertJsonFragment(['id' => $user1->id]);
+        $response->assertJsonFragment(['id' => $user2->id]);
+    }
+
+    /** @test */
+    public function admin_can_filter_users_by_multiple_criteria(): void
+    {
+        $adminUser = User::factory()->for(UserType::where('name', UserType::ADMIN)->first(), 'userType')->create();
+        $playerUserType = UserType::where('name', UserType::PLAYER)->first();
+        $coachUserType = UserType::where('name', UserType::COACH)->first();
+        $teamA = Team::factory()->create();
+        $teamB = Team::factory()->create();
+
+        $user1 = User::factory()->for($playerUserType, 'userType')->create(['firstname' => 'Player', 'lastname' => 'One']);
+        $user2 = User::factory()->for($playerUserType, 'userType')->create(['firstname' => 'Player', 'lastname' => 'Two']);
+        $user3 = User::factory()->for($coachUserType, 'userType')->create(['firstname' => 'Coach', 'lastname' => 'One']);
+
+        $user1->teams()->attach($teamA->id);
+        $user2->teams()->attach($teamB->id);
+        $user3->teams()->attach($teamA->id);
+
+        $response = $this->actingAs($adminUser)->getJson(
+            '/api/users?name=Player&user_type_id=' . $playerUserType->id . '&team_id=' . $teamA->id
+        );
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(1);
+        $response->assertJsonFragment(['id' => $user1->id]);
     }
 }

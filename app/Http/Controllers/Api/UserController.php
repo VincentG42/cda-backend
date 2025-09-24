@@ -21,11 +21,11 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', User::class);
 
-        return response()->json($this->userService->getAllUsers());
+        return response()->json($this->userService->getFilteredUsers($request));
     }
 
     /**

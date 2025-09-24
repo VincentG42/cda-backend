@@ -4,12 +4,18 @@ namespace App\Repositories;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserRepository implements UserRepositoryInterface
 {
     public function all(): Collection
     {
         return User::with('userType')->get();
+    }
+
+    public function query(): Builder
+    {
+        return User::query();
     }
 
     public function find(int $id): ?User

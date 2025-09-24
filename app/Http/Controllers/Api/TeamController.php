@@ -7,6 +7,7 @@ use App\DTOs\UpdateTeamDTO;
 use App\Http\Controllers\Controller;
 use App\Models\Team;
 use App\Models\User;
+use App\Models\UserType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -96,5 +97,36 @@ class TeamController extends Controller
         $team->users()->detach($player->id); // Changed to 'users'
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Assign a coach to the team.
+     */
+    public function assignCoach(Request $request, Team $team): JsonResponse
+    {
+        // Authorization check (e.g., only Admin/President can assign coaches)
+        // For now, we rely on the 'access-admin-panel' middleware on the route group.
+
+        $validated = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $coach = User::with('userType')->findOrFail($validated['user_id']);
+
+        // Check if the user is actually a coach
+        if ($coach->userType->name !== UserType::COACH) {
+            return response()->json(['message' => 'User is not a coach.'], 422);
+        }
+
+        // Check if the coach is already assigned to this team
+        if ($team->coach_id === $coach->id) {
+            return response()->json(['message' => 'Coach is already assigned to this team.'], 409);
+        }
+
+        // Assign the coach to the team
+        $team->coach_id = $coach->id;
+        $team->save();
+
+        return response()->json($team->load('coach'));
     }
 }

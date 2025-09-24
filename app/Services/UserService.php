@@ -8,6 +8,7 @@ use App\DTOs\UpdateUserDTO;
 use App\Models\User;
 use App\Repositories\UserRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
@@ -19,6 +20,31 @@ class UserService
     public function getAllUsers(): Collection
     {
         return $this->userRepository->all();
+    }
+
+    public function getFilteredUsers(Request $request): Collection
+    {
+        $query = $this->userRepository->query();
+
+        $query->when($request->has('name'), function ($q) use ($request) {
+            $name = $request->input('name');
+            $q->where(function ($subQuery) use ($name) {
+                $subQuery->where('firstname', 'like', '%' . $name . '%')
+                         ->orWhere('lastname', 'like', '%' . $name . '%');
+            });
+        });
+
+        $query->when($request->has('team_id'), function ($q) use ($request) {
+            $q->whereHas('teams', function ($subQuery) use ($request) {
+                $subQuery->where('teams.id', $request->input('team_id'));
+            });
+        });
+
+        $query->when($request->has('user_type_id'), function ($q) use ($request) {
+            $q->where('user_type_id', $request->input('user_type_id'));
+        });
+
+        return $query->get();
     }
 
     public function getUserById(int $id): ?User

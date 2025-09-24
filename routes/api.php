@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\EncounterController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\SeasonController;
@@ -11,11 +11,19 @@ use App\Http\Controllers\Api\UserTypeController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/contact', [ContactController::class, 'send']);
 
+// Authenticated routes (any user type)
+Route::middleware(['auth:sanctum'])->group(function () {
+    // My Profile
+    Route::get('/me', [AuthController::class, 'me']);
+
+    // Logout
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
+
+// Admin/privileged routes
 Route::middleware(['auth:sanctum', 'can:access-admin-panel'])->group(function () {
-
-// Logout
-Route::post('/logout', [AuthController::class, 'logout']);
 
 // User
 Route::get('/users', [UserController::class, 'index']);
@@ -41,6 +49,7 @@ Route::get('/seasons', [SeasonController::class, 'index']);
 Route::apiResource('teams', TeamController::class);
 Route::post('teams/{team}/players', [TeamController::class, 'addPlayer'])->name('teams.players.add');
 Route::delete('teams/{team}/players/{player}', [TeamController::class, 'removePlayer'])->name('teams.players.remove');
+Route::post('teams/{team}/coach', [TeamController::class, 'assignCoach'])->name('teams.coach.assign');
 
 // Event
 Route::apiResource('events', EventController::class);
