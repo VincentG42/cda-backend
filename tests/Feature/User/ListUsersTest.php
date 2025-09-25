@@ -112,7 +112,7 @@ class ListUsersTest extends TestCase
         User::factory()->count(3)->for($playerUserType, 'userType')->create(['firstname' => $this->faker->firstName, 'lastname' => $this->faker->lastName]);
         User::factory()->count(2)->for($coachUserType, 'userType')->create(['firstname' => $this->faker->firstName, 'lastname' => $this->faker->lastName]);
 
-        $response = $this->actingAs($adminUser)->getJson('/api/users?user_type_id=' . $playerUserType->id);
+        $response = $this->actingAs($adminUser)->getJson('/api/users?user_type_id='.$playerUserType->id);
 
         $response->assertStatus(200);
         $response->assertJsonCount(3);
@@ -134,7 +134,7 @@ class ListUsersTest extends TestCase
         $user2->teams()->attach($teamA->id);
         $user3->teams()->attach($teamB->id);
 
-        $response = $this->actingAs($adminUser)->getJson('/api/users?team_id=' . $teamA->id);
+        $response = $this->actingAs($adminUser)->getJson('/api/users?team_id='.$teamA->id);
 
         $response->assertStatus(200);
         $response->assertJsonCount(2);
@@ -160,7 +160,7 @@ class ListUsersTest extends TestCase
         $user3->teams()->attach($teamA->id);
 
         $response = $this->actingAs($adminUser)->getJson(
-            '/api/users?name=Player&user_type_id=' . $playerUserType->id . '&team_id=' . $teamA->id
+            '/api/users?name=Player&user_type_id='.$playerUserType->id.'&team_id='.$teamA->id
         );
 
         $response->assertStatus(200);

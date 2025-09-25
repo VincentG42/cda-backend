@@ -29,8 +29,8 @@ class UserService
         $query->when($request->has('name'), function ($q) use ($request) {
             $name = $request->input('name');
             $q->where(function ($subQuery) use ($name) {
-                $subQuery->where('firstname', 'like', '%' . $name . '%')
-                         ->orWhere('lastname', 'like', '%' . $name . '%');
+                $subQuery->where('firstname', 'like', '%'.$name.'%')
+                    ->orWhere('lastname', 'like', '%'.$name.'%');
             });
         });
 

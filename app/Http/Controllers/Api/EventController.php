@@ -4,11 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class EventController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * @group Événements
      *
@@ -18,7 +21,12 @@ class EventController extends Controller
      */
     public function index()
     {
-        return Event::latest()->get();
+        $this->authorize('viewAny', Event::class);
+
+        return Event::with(['author', 'tags'])
+            ->where('start_at', '>=', now())
+            ->orderBy('start_at')
+            ->get();
     }
 
     /**
@@ -26,11 +34,14 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Event::class);
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_at' => 'required|date',
+            'close_at' => 'nullable|date|after_or_equal:start_at',
+            'place' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'additionnal_info' => 'nullable|string',
         ]);
 
         $event = Event::create($validatedData);
@@ -43,6 +54,8 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
+        $this->authorize('view', $event);
+
         return $event;
     }
 
@@ -51,11 +64,14 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event)
     {
+        $this->authorize('update', $event);
         $validatedData = $request->validate([
             'title' => 'sometimes|required|string|max:255',
-            'content' => 'sometimes|required|string',
-            'start_date' => 'sometimes|required|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_at' => 'sometimes|required|date',
+            'close_at' => 'nullable|date|after_or_equal:start_at',
+            'place' => 'sometimes|required|string|max:255',
+            'address' => 'sometimes|required|string|max:255',
+            'additionnal_info' => 'nullable|string',
         ]);
 
         $event->update($validatedData);
@@ -68,6 +84,7 @@ class EventController extends Controller
      */
     public function destroy(Event $event)
     {
+        $this->authorize('delete', $event);
         $event->delete();
 
         return response()->json(null, Response::HTTP_NO_CONTENT);

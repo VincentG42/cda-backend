@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Feature;
 
+use App\Mail\ContactFormMail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
-use App\Mail\ContactFormMail;
 
 class ContactFormTest extends TestCase
 {

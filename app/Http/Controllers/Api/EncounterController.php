@@ -4,18 +4,25 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Encounter;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class EncounterController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        // Eager load relationships for better performance
-        return Encounter::with(['season', 'team'])->latest('happens_at')->get();
+        $this->authorize('viewAny', Encounter::class);
+
+        return Encounter::with(['season', 'team'])
+            ->where('happens_at', '>=', now())
+            ->orderBy('happens_at')
+            ->get();
     }
 
     /**
@@ -23,6 +30,7 @@ class EncounterController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Encounter::class);
         $validatedData = $request->validate([
             'season_id' => 'required|exists:seasons,id',
             'team_id' => 'required|exists:teams,id',
@@ -42,6 +50,8 @@ class EncounterController extends Controller
      */
     public function show(Encounter $encounter)
     {
+        $this->authorize('view', $encounter);
+
         // Load relationships for the single resource
         return $encounter->load(['season', 'team']);
     }
@@ -51,6 +61,7 @@ class EncounterController extends Controller
      */
     public function update(Request $request, Encounter $encounter)
     {
+        $this->authorize('update', $encounter);
         $validatedData = $request->validate([
             'season_id' => 'sometimes|required|exists:seasons,id',
             'team_id' => 'sometimes|required|exists:teams,id',
@@ -70,6 +81,7 @@ class EncounterController extends Controller
      */
     public function destroy(Encounter $encounter)
     {
+        $this->authorize('delete', $encounter);
         $encounter->delete();
 
         return response()->json(null, Response::HTTP_NO_CONTENT);

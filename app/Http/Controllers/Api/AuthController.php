@@ -45,4 +45,12 @@ class AuthController extends Controller
     {
         return response()->json($request->user());
     }
+
+    public function myTeams(Request $request)
+    {
+        $user = $request->user();
+        $user->load(['teams.users', 'teams.encounters']); // Load teams, their players, and their encounters
+
+        return response()->json($user->teams);
+    }
 }

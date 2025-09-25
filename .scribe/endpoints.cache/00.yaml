@@ -5,46 +5,6 @@ description: ''
 endpoints:
   -
     httpMethods:
-      - GET
-    uri: api/test-api
-    metadata:
-      groupName: Endpoints
-      groupDescription: ''
-      subgroup: ''
-      subgroupDescription: ''
-      title: ''
-      description: ''
-      authenticated: false
-      deprecated: false
-      custom: []
-    headers:
-      Content-Type: application/json
-      Accept: application/json
-    urlParameters: []
-    cleanUrlParameters: []
-    queryParameters: []
-    cleanQueryParameters: []
-    bodyParameters: []
-    cleanBodyParameters: []
-    fileParameters: []
-    responses:
-      -
-        status: 200
-        content: 'API OK'
-        headers:
-          content-type: 'text/html; charset=UTF-8'
-          cache-control: 'no-cache, private'
-          access-control-allow-origin: '*'
-        description: null
-        custom: []
-    responseFields: []
-    auth: []
-    controller: null
-    method: null
-    route: null
-    custom: []
-  -
-    httpMethods:
       - POST
     uri: api/login
     metadata:
@@ -68,6 +28,161 @@ endpoints:
     cleanBodyParameters: []
     fileParameters: []
     responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/contact
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: b
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      email:
+        name: email
+        description: 'Must be a valid email address. Must not be greater than 255 characters.'
+        required: true
+        example: zbailey@example.net
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      subject:
+        name: subject
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: i
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      message:
+        name: message
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      name: b
+      email: zbailey@example.net
+      subject: i
+      message: architecto
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/me
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/me/teams
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+        custom: []
     responseFields: []
     auth: []
     controller: null
@@ -131,11 +246,8 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 500
-        content: |-
-          {
-              "message": "Server Error"
-          }
+        status: 401
+        content: '{"message":"Unauthenticated."}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -185,11 +297,8 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 500
-        content: |-
-          {
-              "message": "Server Error"
-          }
+        status: 401
+        content: '{"message":"Unauthenticated."}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -343,11 +452,8 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 500
-        content: |-
-          {
-              "message": "Server Error"
-          }
+        status: 401
+        content: '{"message":"Unauthenticated."}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -382,14 +488,14 @@ endpoints:
         name: id
         description: 'The ID of the user type.'
         required: true
-        example: 16
-        type: integer
+        example: architecto
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 16
+      id: architecto
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -397,11 +503,8 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 500
-        content: |-
-          {
-              "message": "Server Error"
-          }
+        status: 401
+        content: '{"message":"Unauthenticated."}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -478,14 +581,14 @@ endpoints:
         name: id
         description: 'The ID of the user type.'
         required: true
-        example: 16
-        type: integer
+        example: architecto
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 16
+      id: architecto
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters:
@@ -531,14 +634,14 @@ endpoints:
         name: id
         description: 'The ID of the user type.'
         required: true
-        example: 16
-        type: integer
+        example: architecto
+        type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
     cleanUrlParameters:
-      id: 16
+      id: architecto
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -577,11 +680,8 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 500
-        content: |-
-          {
-              "message": "Server Error"
-          }
+        status: 401
+        content: '{"message":"Unauthenticated."}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -620,11 +720,8 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 500
-        content: |-
-          {
-              "message": "Server Error"
-          }
+        status: 401
+        content: '{"message":"Unauthenticated."}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -663,11 +760,8 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 500
-        content: |-
-          {
-              "message": "Server Error"
-          }
+        status: 401
+        content: '{"message":"Unauthenticated."}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -748,11 +842,8 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 500
-        content: |-
-          {
-              "message": "Server Error"
-          }
+        status: 401
+        content: '{"message":"Unauthenticated."}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -959,6 +1050,59 @@ endpoints:
   -
     httpMethods:
       - POST
+    uri: 'api/teams/{team_id}/coach'
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Assign a coach to the team.'
+      description: ''
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      team_id:
+        name: team_id
+        description: 'The ID of the team.'
+        required: true
+        example: 16
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      team_id: 16
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      user_id:
+        name: user_id
+        description: 'The <code>id</code> of an existing record in the users table.'
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      user_id: architecto
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
     uri: api/events
     metadata:
       groupName: Endpoints
@@ -988,31 +1132,51 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         custom: []
-      content:
-        name: content
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      start_date:
-        name: start_date
+      start_at:
+        name: start_at
         description: 'Must be a valid date.'
         required: true
-        example: '2025-09-14T15:25:57'
+        example: '2025-09-25T07:25:55'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
-      end_date:
-        name: end_date
-        description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
+      close_at:
+        name: close_at
+        description: 'Must be a valid date. Must be a date after or equal to <code>start_at</code>.'
         required: false
-        example: '2051-10-08'
+        example: '2051-10-19'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      place:
+        name: place
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      address:
+        name: address
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: g
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      additionnal_info:
+        name: additionnal_info
+        description: ''
+        required: false
+        example: architecto
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1020,9 +1184,11 @@ endpoints:
         custom: []
     cleanBodyParameters:
       title: b
-      content: architecto
-      start_date: '2025-09-14T15:25:57'
-      end_date: '2051-10-08'
+      start_at: '2025-09-25T07:25:55'
+      close_at: '2051-10-19'
+      place: 'n'
+      address: g
+      additionnal_info: architecto
     fileParameters: []
     responses: []
     responseFields: []
@@ -1068,11 +1234,8 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 500
-        content: |-
-          {
-              "message": "Server Error"
-          }
+        status: 401
+        content: '{"message":"Unauthenticated."}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -1129,31 +1292,51 @@ endpoints:
         exampleWasSpecified: false
         nullable: false
         custom: []
-      content:
-        name: content
-        description: ''
-        required: true
-        example: architecto
-        type: string
-        enumValues: []
-        exampleWasSpecified: false
-        nullable: false
-        custom: []
-      start_date:
-        name: start_date
+      start_at:
+        name: start_at
         description: 'Must be a valid date.'
         required: true
-        example: '2025-09-14T15:25:57'
+        example: '2025-09-25T07:25:55'
         type: string
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         custom: []
-      end_date:
-        name: end_date
-        description: 'Must be a valid date. Must be a date after or equal to <code>start_date</code>.'
+      close_at:
+        name: close_at
+        description: 'Must be a valid date. Must be a date after or equal to <code>start_at</code>.'
         required: false
-        example: '2051-10-08'
+        example: '2051-10-19'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        custom: []
+      place:
+        name: place
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: 'n'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      address:
+        name: address
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: g
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      additionnal_info:
+        name: additionnal_info
+        description: ''
+        required: false
+        example: architecto
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1161,9 +1344,11 @@ endpoints:
         custom: []
     cleanBodyParameters:
       title: b
-      content: architecto
-      start_date: '2025-09-14T15:25:57'
-      end_date: '2051-10-08'
+      start_at: '2025-09-25T07:25:55'
+      close_at: '2051-10-19'
+      place: 'n'
+      address: g
+      additionnal_info: architecto
     fileParameters: []
     responses: []
     responseFields: []
@@ -1240,11 +1425,8 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 500
-        content: |-
-          {
-              "message": "Server Error"
-          }
+        status: 401
+        content: '{"message":"Unauthenticated."}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -1323,7 +1505,7 @@ endpoints:
         name: happens_at
         description: 'Must be a valid date.'
         required: true
-        example: '2025-09-14T15:25:57'
+        example: '2025-09-25T07:25:55'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1333,7 +1515,7 @@ endpoints:
         name: is_victory
         description: ''
         required: false
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -1344,8 +1526,8 @@ endpoints:
       team_id: architecto
       opponent: 'n'
       is_at_home: true
-      happens_at: '2025-09-14T15:25:57'
-      is_victory: false
+      happens_at: '2025-09-25T07:25:55'
+      is_victory: true
     fileParameters: []
     responses: []
     responseFields: []
@@ -1391,11 +1573,8 @@ endpoints:
     fileParameters: []
     responses:
       -
-        status: 500
-        content: |-
-          {
-              "message": "Server Error"
-          }
+        status: 401
+        content: '{"message":"Unauthenticated."}'
         headers:
           cache-control: 'no-cache, private'
           content-type: application/json
@@ -1476,7 +1655,7 @@ endpoints:
         name: is_at_home
         description: ''
         required: true
-        example: false
+        example: true
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -1486,7 +1665,7 @@ endpoints:
         name: happens_at
         description: 'Must be a valid date.'
         required: true
-        example: '2025-09-14T15:25:57'
+        example: '2025-09-25T07:25:55'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1496,7 +1675,7 @@ endpoints:
         name: is_victory
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -1506,9 +1685,9 @@ endpoints:
       season_id: architecto
       team_id: architecto
       opponent: 'n'
-      is_at_home: false
-      happens_at: '2025-09-14T15:25:57'
-      is_victory: true
+      is_at_home: true
+      happens_at: '2025-09-25T07:25:55'
+      is_victory: false
     fileParameters: []
     responses: []
     responseFields: []
