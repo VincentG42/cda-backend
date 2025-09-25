@@ -41,6 +41,9 @@ jobs:
     - name: Check Code Style
       run: vendor/bin/pint --test
 
+    - name: List Tests Directory
+      run: ls -la tests/
+
     - name: Run Tests
       run: php artisan test
 

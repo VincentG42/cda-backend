@@ -44,6 +44,7 @@ class EventController extends Controller
             'additionnal_info' => 'nullable|string',
         ]);
 
+        $validatedData['author_id'] = auth()->id();
         $event = Event::create($validatedData);
 
         return response()->json($event, Response::HTTP_CREATED);
