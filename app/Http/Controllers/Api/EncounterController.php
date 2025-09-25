@@ -15,14 +15,27 @@ class EncounterController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Encounter::class);
 
-        return Encounter::with(['season', 'team'])
-            ->where('happens_at', '>=', now())
-            ->orderBy('happens_at')
-            ->get();
+        $query = Encounter::with(['season', 'team']);
+
+        if ($request->has('team_id')) {
+            $teamId = $request->input('team_id');
+            $query->where('team_id', $teamId);
+        }
+
+        $filter = $request->input('filter', 'upcoming'); // Default to 'upcoming'
+
+        if ($filter === 'past') {
+            $query->where('happens_at', '<', now());
+        } elseif ($filter === 'upcoming') {
+            $query->where('happens_at', '>=', now());
+        }
+        // If 'all', no date filter is applied
+
+        return $query->orderBy('happens_at')->get();
     }
 
     /**

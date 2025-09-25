@@ -20,6 +20,10 @@ class Encounter extends Model
         'is_victory',
     ];
 
+    protected $casts = [
+        'happens_at' => 'datetime',
+    ];
+
     public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);
