@@ -29,6 +29,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // My Teams
     Route::get('/me/teams', [AuthController::class, 'myTeams']);
 
+    // My Dashboard
+    Route::get('/me/dashboard', [AuthController::class, 'myDashboard']);
+
     // Logout
     Route::post('/logout', [AuthController::class, 'logout']);
 });

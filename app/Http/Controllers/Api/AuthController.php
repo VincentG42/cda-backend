@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\DTOs\LoginDTO;
 use App\Http\Controllers\Controller;
+use App\Models\Encounter;
+use App\Models\Event;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -54,6 +56,38 @@ class AuthController extends Controller
 
         return response()->json($user->teams);
     }
+
+    public function myDashboard(Request $request)
+    {
+        $user = $request->user();
+        $user->load('teams'); // Load user's teams
+
+        $upcomingActivities = collect();
+
+        // Get upcoming encounters for the user's teams
+        foreach ($user->teams as $team) {
+            $upcomingEncounters = $team->encounters()
+                ->where('happens_at', '>=', now())
+                ->orderBy('happens_at')
+                ->get();
+            $upcomingActivities = $upcomingActivities->concat($upcomingEncounters);
+        }
+
+        // Get all general upcoming events
+        $upcomingEvents = \App\Models\Event::where('start_at', '>=', now())
+            ->orderBy('start_at')
+            ->get();
+
+        $upcomingActivities = $upcomingActivities->concat($upcomingEvents);
+
+        // Sort all activities by their date
+        $sortedActivities = $upcomingActivities->sortBy(function ($activity) {
+            return $activity->happens_at ?? $activity->start_at;
+        })->values(); // Re-index the collection
+
+        return response()->json($sortedActivities);
+    }
+
 
     public function forgotPassword(Request $request)
     {
