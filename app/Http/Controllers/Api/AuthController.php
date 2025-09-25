@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\DTOs\LoginDTO;
 use App\Http\Controllers\Controller;
-use App\Models\Encounter;
-use App\Models\Event;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -87,7 +85,6 @@ class AuthController extends Controller
 
         return response()->json($sortedActivities);
     }
-
 
     public function forgotPassword(Request $request)
     {
