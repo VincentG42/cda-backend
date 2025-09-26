@@ -5,10 +5,11 @@ namespace App\Services;
 use App\DTOs\CreateUserDTO;
 use App\DTOs\LoginDTO;
 use App\DTOs\UpdateUserDTO;
+use App\DTOs\UserFilterDTO;
 use App\Models\User;
 use App\Repositories\UserRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
@@ -22,29 +23,28 @@ class UserService
         return $this->userRepository->all();
     }
 
-    public function getFilteredUsers(Request $request): Collection
+    public function getFilteredUsers(UserFilterDTO $dto): LengthAwarePaginator
     {
-        $query = $this->userRepository->query();
+        $query = $this->userRepository->query()->with('userType');
 
-        $query->when($request->has('name'), function ($q) use ($request) {
-            $name = $request->input('name');
-            $q->where(function ($subQuery) use ($name) {
-                $subQuery->where('firstname', 'like', '%'.$name.'%')
-                    ->orWhere('lastname', 'like', '%'.$name.'%');
+        $query->when($dto->name, function ($q) use ($dto) {
+            $q->where(function ($subQuery) use ($dto) {
+                $subQuery->where('firstname', 'like', '%'.$dto->name.'%')
+                    ->orWhere('lastname', 'like', '%'.$dto->name.'%');
             });
         });
 
-        $query->when($request->has('team_id'), function ($q) use ($request) {
-            $q->whereHas('teams', function ($subQuery) use ($request) {
-                $subQuery->where('teams.id', $request->input('team_id'));
+        $query->when($dto->team_id, function ($q) use ($dto) {
+            $q->whereHas('teams', function ($subQuery) use ($dto) {
+                $subQuery->where('teams.id', $dto->team_id);
             });
         });
 
-        $query->when($request->has('user_type_id'), function ($q) use ($request) {
-            $q->where('user_type_id', $request->input('user_type_id'));
+        $query->when($dto->user_type_id, function ($q) use ($dto) {
+            $q->where('user_type_id', $dto->user_type_id);
         });
 
-        return $query->get();
+        return $query->paginate(15);
     }
 
     public function getUserById(int $id): ?User

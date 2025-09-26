@@ -109,6 +109,163 @@ endpoints:
     custom: []
   -
     httpMethods:
+      - POST
+    uri: api/forgot-password
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      email:
+        name: email
+        description: 'Must be a valid email address.'
+        required: true
+        example: gbailey@example.net
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      email: gbailey@example.net
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/reset-password
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      token:
+        name: token
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      email:
+        name: email
+        description: 'Must be a valid email address.'
+        required: true
+        example: zbailey@example.net
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      password:
+        name: password
+        description: 'Must be at least 8 characters.'
+        required: true
+        example: '-0pBNvYgxw'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      token: architecto
+      email: zbailey@example.net
+      password: '-0pBNvYgxw'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: 'api/reset-password/{token}'
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      token:
+        name: token
+        description: ''
+        required: true
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanUrlParameters:
+      token: architecto
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: '{"message":"Redirect to frontend password reset page."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
       - GET
     uri: api/me
     metadata:
@@ -151,6 +308,46 @@ endpoints:
     httpMethods:
       - GET
     uri: api/me/teams
+    metadata:
+      groupName: Endpoints
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: false
+      deprecated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/me/dashboard
     metadata:
       groupName: Endpoints
       groupDescription: ''
@@ -1024,7 +1221,7 @@ endpoints:
         name: player_id
         description: 'The ID of the player.'
         required: true
-        example: 16
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
@@ -1032,7 +1229,7 @@ endpoints:
         custom: []
     cleanUrlParameters:
       team_id: 16
-      player_id: 16
+      player_id: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -1134,7 +1331,7 @@ endpoints:
         name: start_at
         description: 'Must be a valid date.'
         required: true
-        example: '2025-09-25T07:25:55'
+        example: '2025-09-25T12:10:40'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1182,7 +1379,7 @@ endpoints:
         custom: []
     cleanBodyParameters:
       title: b
-      start_at: '2025-09-25T07:25:55'
+      start_at: '2025-09-25T12:10:40'
       close_at: '2051-10-19'
       place: 'n'
       address: g
@@ -1294,7 +1491,7 @@ endpoints:
         name: start_at
         description: 'Must be a valid date.'
         required: true
-        example: '2025-09-25T07:25:55'
+        example: '2025-09-25T12:10:40'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1342,7 +1539,7 @@ endpoints:
         custom: []
     cleanBodyParameters:
       title: b
-      start_at: '2025-09-25T07:25:55'
+      start_at: '2025-09-25T12:10:40'
       close_at: '2051-10-19'
       place: 'n'
       address: g
@@ -1503,7 +1700,7 @@ endpoints:
         name: happens_at
         description: 'Must be a valid date.'
         required: true
-        example: '2025-09-25T07:25:55'
+        example: '2025-09-25T12:10:40'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1513,7 +1710,7 @@ endpoints:
         name: is_victory
         description: ''
         required: false
-        example: true
+        example: false
         type: boolean
         enumValues: []
         exampleWasSpecified: false
@@ -1524,8 +1721,8 @@ endpoints:
       team_id: architecto
       opponent: 'n'
       is_at_home: true
-      happens_at: '2025-09-25T07:25:55'
-      is_victory: true
+      happens_at: '2025-09-25T12:10:40'
+      is_victory: false
     fileParameters: []
     responses: []
     responseFields: []
@@ -1663,7 +1860,7 @@ endpoints:
         name: happens_at
         description: 'Must be a valid date.'
         required: true
-        example: '2025-09-25T07:25:55'
+        example: '2025-09-25T12:10:40'
         type: string
         enumValues: []
         exampleWasSpecified: false
@@ -1684,7 +1881,7 @@ endpoints:
       team_id: architecto
       opponent: 'n'
       is_at_home: true
-      happens_at: '2025-09-25T07:25:55'
+      happens_at: '2025-09-25T12:10:40'
       is_victory: false
     fileParameters: []
     responses: []

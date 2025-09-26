@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\DTOs\CreateUserDTO;
 use App\DTOs\UpdateUserDTO;
+use App\DTOs\UserFilterDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -25,7 +27,13 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        return response()->json($this->userService->getFilteredUsers($request));
+        $filterDto = UserFilterDTO::fromRequest($request);
+        $users = $this->userService->getFilteredUsers($filterDto);
+
+        // Ensure userType is loaded for resource expectations
+        $users->load('userType');
+
+        return UserResource::collection($users);
     }
 
     /**
@@ -37,7 +45,7 @@ class UserController extends Controller
         $dto = CreateUserDTO::fromRequest($request);
         $user = $this->userService->createUser($dto);
 
-        return response()->json($user, 201);
+        return new UserResource($user);
     }
 
     /**
@@ -53,7 +61,7 @@ class UserController extends Controller
 
         $this->authorize('view', $user);
 
-        return response()->json($user);
+        return new UserResource($user);
     }
 
     /**
@@ -83,7 +91,7 @@ class UserController extends Controller
 
         $user = $this->userService->getUserById($id);
 
-        return response()->json($user);
+        return new UserResource($user);
     }
 
     /**

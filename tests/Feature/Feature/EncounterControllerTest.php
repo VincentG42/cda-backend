@@ -57,7 +57,7 @@ class EncounterControllerTest extends TestCase
         $response = $this->getJson('/api/encounters');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(2); // Only upcoming encounters
+        $response->assertJsonCount(2, 'data'); // Only upcoming encounters
     }
 
     /** @test */
@@ -78,6 +78,7 @@ class EncounterControllerTest extends TestCase
         $response = $this->postJson('/api/encounters', $encounterData);
 
         $response->assertStatus(201);
+        $response->assertJsonFragment(['opponent' => 'Opponent Team']);
         $this->assertDatabaseHas('encounters', ['opponent' => 'Opponent Team']);
     }
 
@@ -90,6 +91,7 @@ class EncounterControllerTest extends TestCase
         $response = $this->putJson('/api/encounters/'.$encounter->id, ['opponent' => $newOpponent]);
 
         $response->assertStatus(200);
+        $response->assertJsonFragment(['opponent' => $newOpponent]);
         $this->assertDatabaseHas('encounters', ['id' => $encounter->id, 'opponent' => $newOpponent]);
     }
 
@@ -101,6 +103,7 @@ class EncounterControllerTest extends TestCase
         $response = $this->putJson('/api/encounters/'.$encounter->id, ['is_victory' => true]);
 
         $response->assertStatus(200);
+        $response->assertJsonFragment(['is_victory' => true]);
         $this->assertDatabaseHas('encounters', ['id' => $encounter->id, 'is_victory' => true]);
     }
 

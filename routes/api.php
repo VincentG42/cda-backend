@@ -13,14 +13,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/contact', [ContactController::class, 'send']);
-
-// Password Reset Routes
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-
-Route::get('/reset-password/{token}', function () {
-    return response()->json(['message' => 'Redirect to frontend password reset page.']);
-})->name('password.reset');
 
 // Authenticated routes (any user type)
 Route::middleware(['auth:sanctum'])->group(function () {

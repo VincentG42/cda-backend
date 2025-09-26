@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\DTOs\LoginDTO;
 use App\Http\Controllers\Controller;
+use App\Notifications\ResetPasswordNotification;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
@@ -88,32 +90,37 @@ class AuthController extends Controller
 
     public function forgotPassword(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $validated = $request->validate(['email' => 'required|email|exists:users,email']);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
-
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json(['message' => __($status)], 200);
+        $user = \App\Models\User::where('email', $validated['email'])->first();
+        if (! $user) {
+            return response()->json(['message' => __('passwords.user')], 422);
         }
 
-        return response()->json(['message' => __($status)], 500);
+        $token = Password::createToken($user);
+        Notification::send($user, new ResetPasswordNotification($token));
+
+        return response()->json(['message' => __('passwords.sent')], 200);
     }
 
     public function resetPassword(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'token' => 'required',
             'email' => 'required|email',
             'password' => 'required|confirmed|min:8',
         ]);
 
         $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user) use ($request) {
+            [
+                'email' => $validated['email'],
+                'password' => $validated['password'],
+                'password_confirmation' => $request->input('password_confirmation'),
+                'token' => $validated['token'],
+            ],
+            function ($user) use ($validated) {
                 $user->forceFill([
-                    'password' => bcrypt($request->password),
+                    'password' => bcrypt($validated['password']),
                 ])->save();
             }
         );
@@ -122,6 +129,6 @@ class AuthController extends Controller
             return response()->json(['message' => __($status)], 200);
         }
 
-        return response()->json(['message' => __($status)], 500);
+        return response()->json(['message' => __($status)], 422);
     }
 }

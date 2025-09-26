@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DTOs\CreateEventDTO;
+use App\DTOs\UpdateEventDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\EventResource;
 use App\Models\Event;
+use App\Services\EventService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,82 +16,46 @@ class EventController extends Controller
 {
     use AuthorizesRequests;
 
-    /**
-     * @group Événements
-     *
-     * @summary Lister tous les événements
-     *
-     * Récupère une liste de tous les événements, triés par date de début la plus récente.
-     */
+    public function __construct(private EventService $eventService) {}
+
     public function index()
     {
         $this->authorize('viewAny', Event::class);
+        $events = $this->eventService->getUpcomingEvents();
 
-        return Event::with(['author', 'tags'])
-            ->where('start_at', '>=', now())
-            ->orderBy('start_at')
-            ->get();
+        return EventResource::collection($events);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): EventResource
     {
         $this->authorize('create', Event::class);
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'start_at' => 'required|date',
-            'close_at' => 'nullable|date|after_or_equal:start_at',
-            'place' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
-            'additionnal_info' => 'nullable|string',
-        ]);
+        $dto = CreateEventDTO::fromRequest($request);
+        $event = $this->eventService->createEvent($dto);
 
-        $validatedData['author_id'] = auth()->id();
-        $event = Event::create($validatedData);
-
-        return response()->json($event, Response::HTTP_CREATED);
+        return new EventResource($event);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Event $event)
+    public function show(Event $event): EventResource
     {
         $this->authorize('view', $event);
 
-        return $event;
+        return new EventResource($event->load(['author', 'tags']));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Event $event)
+    public function update(Request $request, Event $event): EventResource
     {
         $this->authorize('update', $event);
-        $validatedData = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'start_at' => 'sometimes|required|date',
-            'close_at' => 'nullable|date|after_or_equal:start_at',
-            'place' => 'sometimes|required|string|max:255',
-            'address' => 'sometimes|required|string|max:255',
-            'additionnal_info' => 'nullable|string',
-        ]);
+        $dto = UpdateEventDTO::fromRequest($request);
+        $this->eventService->updateEvent($event, $dto);
 
-        $event->update($validatedData);
-
-        return response()->json($event);
+        return new EventResource($event->fresh()->load(['author', 'tags']));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Event $event)
+    public function destroy(Event $event): Response
     {
         $this->authorize('delete', $event);
-        $event->delete();
+        $this->eventService->deleteEvent($event);
 
-        return response()->json(null, Response::HTTP_NO_CONTENT);
+        return response(null, Response::HTTP_NO_CONTENT);
     }
 }

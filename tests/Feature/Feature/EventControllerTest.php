@@ -57,7 +57,7 @@ class EventControllerTest extends TestCase
         $response = $this->getJson('/api/events');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(2); // Only upcoming events
+        $response->assertJsonCount(2, 'data'); // Only upcoming events
     }
 
     /** @test */
@@ -70,12 +70,12 @@ class EventControllerTest extends TestCase
             'place' => 'Event Place',
             'address' => 'Event Address',
             'additionnal_info' => 'Some info',
-            'author_id' => $this->eventAuthor->id,
         ];
 
         $response = $this->postJson('/api/events', $eventData);
 
         $response->assertStatus(201);
+        $response->assertJsonFragment(['title' => 'New Event']);
         $this->assertDatabaseHas('events', ['title' => 'New Event']);
     }
 
@@ -88,6 +88,7 @@ class EventControllerTest extends TestCase
         $response = $this->putJson('/api/events/'.$event->id, ['title' => $newTitle]);
 
         $response->assertStatus(200);
+        $response->assertJsonFragment(['title' => $newTitle]);
         $this->assertDatabaseHas('events', ['id' => $event->id, 'title' => $newTitle]);
     }
 
@@ -113,7 +114,6 @@ class EventControllerTest extends TestCase
             'place' => 'Event Place',
             'address' => 'Event Address',
             'additionnal_info' => 'Some info',
-            'author_id' => $this->eventAuthor->id,
         ];
 
         $response = $this->postJson('/api/events', $eventData);

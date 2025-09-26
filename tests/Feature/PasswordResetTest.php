@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
 class PasswordResetTest extends TestCase
@@ -15,14 +18,17 @@ class PasswordResetTest extends TestCase
     /** @test */
     public function a_password_reset_link_can_be_requested(): void
     {
+        Notification::fake();
+
         $user = User::factory()->create(['email' => 'test@example.com']);
 
         $response = $this->postJson('/api/forgot-password', ['email' => 'test@example.com']);
 
         $response->assertStatus(200)
-            ->assertJson(['message' => 'We have emailed your password reset link.']);
+            ->assertJson(['message' => __('passwords.sent')]);
 
         $this->assertDatabaseHas('password_reset_tokens', ['email' => 'test@example.com']);
+        Notification::assertSentTo($user, ResetPasswordNotification::class);
     }
 
     /** @test */
@@ -30,21 +36,17 @@ class PasswordResetTest extends TestCase
     {
         $response = $this->postJson('/api/forgot-password', ['email' => 'nonexistent@example.com']);
 
-        $response->assertStatus(500); // Laravel returns 500 if email not found by default
+        $response->assertStatus(422); // Laravel returns 422 for validation errors (email not found)
     }
 
     /** @test */
     public function a_password_can_be_reset_with_a_valid_token(): void
     {
+        Notification::fake();
+
         $user = User::factory()->create(['email' => 'test@example.com', 'password' => Hash::make('old-password')]);
 
-        // Manually create a password reset token
-        $token = \Illuminate\Support\Str::random(60);
-        DB::table('password_reset_tokens')->insert([
-            'email' => 'test@example.com',
-            'token' => Hash::make($token), // Token is hashed in the database
-            'created_at' => now(),
-        ]);
+        $token = Password::createToken($user);
 
         $response = $this->postJson('/api/reset-password', [
             'token' => $token,
@@ -54,7 +56,7 @@ class PasswordResetTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-            ->assertJson(['message' => 'Your password has been reset.']);
+            ->assertJson(['message' => __('passwords.reset')]);
 
         $this->assertTrue(Hash::check('new-password', $user->fresh()->password));
         $this->assertDatabaseMissing('password_reset_tokens', ['email' => 'test@example.com']);
@@ -72,22 +74,20 @@ class PasswordResetTest extends TestCase
             'password_confirmation' => 'new-password',
         ]);
 
-        $response->assertStatus(500); // Laravel returns 500 for invalid token
+        $response->assertStatus(422); // Laravel returns 422 for invalid token
         $this->assertTrue(Hash::check('old-password', $user->fresh()->password));
     }
 
     /** @test */
     public function a_password_cannot_be_reset_with_mismatched_passwords(): void
     {
+        Notification::fake();
+
         $user = User::factory()->create(['email' => 'test@example.com', 'password' => Hash::make('old-password')]);
 
-        // Manually create a password reset token
-        $token = \Illuminate\Support\Str::random(60);
-        DB::table('password_reset_tokens')->insert([
-            'email' => 'test@example.com',
-            'token' => Hash::make($token),
-            'created_at' => now(),
-        ]);
+        // Request a password reset link to get a valid token
+        $this->postJson('/api/forgot-password', ['email' => 'test@example.com']);
+        $token = DB::table('password_reset_tokens')->where('email', 'test@example.com')->first()->token;
 
         $response = $this->postJson('/api/reset-password', [
             'token' => $token,

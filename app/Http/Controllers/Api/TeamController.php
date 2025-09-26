@@ -5,128 +5,103 @@ namespace App\Http\Controllers\Api;
 use App\DTOs\CreateTeamDTO;
 use App\DTOs\UpdateTeamDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TeamResource;
 use App\Models\Team;
 use App\Models\User;
-use App\Models\UserType;
+use App\Services\TeamService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use InvalidArgumentException;
 
 class TeamController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): JsonResponse
-    {
-        $teams = Team::with(['category', 'coach', 'season'])->get();
+    use AuthorizesRequests;
 
-        return response()->json($teams);
+    public function __construct(private TeamService $teamService) {}
+
+    public function index(): AnonymousResourceCollection
+    {
+        $this->authorize('viewAny', Team::class);
+        $teams = $this->teamService->getAllTeams();
+
+        return TeamResource::collection($teams);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): TeamResource
     {
+        $this->authorize('create', Team::class);
         $dto = CreateTeamDTO::fromRequest($request);
-        $team = Team::create($dto->toArray());
+        $team = $this->teamService->createTeam($dto);
 
-        return response()->json($team, 201);
+        return new TeamResource($team);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Team $team): JsonResponse
+    public function show(Team $team): TeamResource
     {
-        $team->load(['category', 'coach', 'season', 'users']); // Changed to 'users'
+        $this->authorize('view', $team);
+        $team->load(['category', 'coach', 'season', 'users']);
 
-        return response()->json($team);
+        return new TeamResource($team);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Team $team): JsonResponse
+    public function update(Request $request, Team $team): TeamResource
     {
+        $this->authorize('update', $team);
         $dto = UpdateTeamDTO::fromRequest($request);
-        $team->update($dto->toArray());
+        $this->teamService->updateTeam($team, $dto);
 
-        return response()->json($team);
+        return new TeamResource($team->fresh());
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Team $team): JsonResponse
     {
-        $team->delete();
+        $this->authorize('delete', $team);
+        $this->teamService->deleteTeam($team);
 
         return response()->json(null, 204);
     }
 
-    /**
-     * Add a player to the team.
-     */
-    public function addPlayer(Request $request, Team $team): JsonResponse
+    public function addPlayer(Request $request, Team $team): JsonResponse|TeamResource
     {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
-
+        $this->authorize('update', $team);
+        $validated = $request->validate(['user_id' => 'required|exists:users,id']);
         $user = User::findOrFail($validated['user_id']);
 
-        if ($team->users()->where('user_id', $user->id)->exists()) { // Changed to 'users'
-            return response()->json(['message' => 'Player is already in the team.'], 409);
+        try {
+            $team = $this->teamService->addPlayer($team, $user);
+
+            return new TeamResource($team);
+        } catch (InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        $team->users()->attach($user->id); // Changed to 'users'
-
-        return response()->json($team->load('users')); // Changed to 'users'
     }
 
-    /**
-     * Remove a player from the team.
-     */
     public function removePlayer(Team $team, User $player): JsonResponse
     {
-        if (! $team->users()->where('user_id', $player->id)->exists()) { // Changed to 'users'
-            return response()->json(['message' => 'Player not found in team.'], 404);
+        $this->authorize('update', $team);
+        try {
+            $this->teamService->removePlayer($team, $player);
+
+            return response()->json(null, 204);
+        } catch (InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        $team->users()->detach($player->id); // Changed to 'users'
-
-        return response()->json(null, 204);
     }
 
-    /**
-     * Assign a coach to the team.
-     */
-    public function assignCoach(Request $request, Team $team): JsonResponse
+    public function assignCoach(Request $request, Team $team): JsonResponse|TeamResource
     {
-        // Authorization check (e.g., only Admin/President can assign coaches)
-        // For now, we rely on the 'access-admin-panel' middleware on the route group.
+        $this->authorize('update', $team);
+        $validated = $request->validate(['user_id' => ['required', 'exists:users,id']]);
+        $coach = User::findOrFail($validated['user_id']);
 
-        $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
-        ]);
+        try {
+            $team = $this->teamService->assignCoach($team, $coach);
 
-        $coach = User::with('userType')->findOrFail($validated['user_id']);
-
-        // Check if the user is actually a coach
-        if ($coach->userType->name !== UserType::COACH) {
-            return response()->json(['message' => 'User is not a coach.'], 422);
+            return new TeamResource($team);
+        } catch (InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], $e->getCode());
         }
-
-        // Check if the coach is already assigned to this team
-        if ($team->coach_id === $coach->id) {
-            return response()->json(['message' => 'Coach is already assigned to this team.'], 409);
-        }
-
-        // Assign the coach to the team
-        $team->coach_id = $coach->id;
-        $team->save();
-
-        return response()->json($team->load('coach'));
     }
 }

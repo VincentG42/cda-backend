@@ -65,9 +65,9 @@ class EncounterFilteringTest extends TestCase
     {
         $response = $this->getJson("/api/encounters?team_id={$this->team1->id}&filter=all");
         $response->assertStatus(200);
-        $response->assertJsonCount(2);
-        $response->assertJsonFragment(['team_id' => $this->team1->id]);
-        $response->assertJsonMissing(['team_id' => $this->team2->id]);
+        $response->assertJsonCount(2, 'data');
+        $response->assertJsonFragment(['team' => ['id' => $this->team1->id]]);
+        $response->assertJsonMissing(['team' => ['id' => $this->team2->id]]);
     }
 
     /** @test */
@@ -75,7 +75,7 @@ class EncounterFilteringTest extends TestCase
     {
         $response = $this->getJson('/api/encounters?filter=past');
         $response->assertStatus(200);
-        $response->assertJsonCount(2); // 2 past encounters
+        $response->assertJsonCount(2, 'data'); // 2 past encounters
         $response->assertJsonMissing(
             ['happens_at' => Encounter::where('happens_at', '>=', now())->first()->happens_at->toDateTimeString()]
         );
@@ -86,7 +86,7 @@ class EncounterFilteringTest extends TestCase
     {
         $response = $this->getJson('/api/encounters?filter=upcoming');
         $response->assertStatus(200);
-        $response->assertJsonCount(2); // 2 upcoming encounters
+        $response->assertJsonCount(2, 'data'); // 2 upcoming encounters
         $response->assertJsonMissing(
             ['happens_at' => Encounter::where('happens_at', '<', now())->first()->happens_at->toDateTimeString()]
         );
@@ -97,7 +97,7 @@ class EncounterFilteringTest extends TestCase
     {
         $response = $this->getJson('/api/encounters?filter=all');
         $response->assertStatus(200);
-        $response->assertJsonCount(4); // 2 past + 2 upcoming
+        $response->assertJsonCount(4, 'data'); // 2 past + 2 upcoming
     }
 
     /** @test */
@@ -105,9 +105,9 @@ class EncounterFilteringTest extends TestCase
     {
         $response = $this->getJson("/api/encounters?team_id={$this->team1->id}&filter=past");
         $response->assertStatus(200);
-        $response->assertJsonCount(1);
-        $response->assertJsonFragment(['team_id' => $this->team1->id]);
-        $response->assertJsonMissing(['team_id' => $this->team2->id]);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonFragment(['team' => ['id' => $this->team1->id]]);
+        $response->assertJsonMissing(['team' => ['id' => $this->team2->id]]);
         $response->assertJsonMissing(
             ['happens_at' => Encounter::where('team_id', $this->team1->id)->where('happens_at', '>=', now())->first()->happens_at->toDateTimeString()]
         );
@@ -118,9 +118,9 @@ class EncounterFilteringTest extends TestCase
     {
         $response = $this->getJson("/api/encounters?team_id={$this->team2->id}&filter=upcoming");
         $response->assertStatus(200);
-        $response->assertJsonCount(1);
-        $response->assertJsonFragment(['team_id' => $this->team2->id]);
-        $response->assertJsonMissing(['team_id' => $this->team1->id]);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonFragment(['team' => ['id' => $this->team2->id]]);
+        $response->assertJsonMissing(['team' => ['id' => $this->team1->id]]);
         $response->assertJsonMissing(
             ['happens_at' => Encounter::where('team_id', $this->team2->id)->where('happens_at', '<', now())->first()->happens_at->toDateTimeString()]
         );

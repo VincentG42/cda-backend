@@ -48,7 +48,7 @@ class ListUsersTest extends TestCase
         $response = $this->actingAs($adminUser)->getJson('/api/users');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(6);
+        $response->assertJsonCount(6, 'data');
     }
 
     /** @test */
@@ -60,7 +60,7 @@ class ListUsersTest extends TestCase
         $response = $this->actingAs($presidentUser)->getJson('/api/users');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(6);
+        $response->assertJsonCount(6, 'data');
     }
 
     /** @test */
@@ -72,7 +72,7 @@ class ListUsersTest extends TestCase
         $response = $this->actingAs($staffUser)->getJson('/api/users');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(6);
+        $response->assertJsonCount(6, 'data');
     }
 
     /** @test */
@@ -84,7 +84,7 @@ class ListUsersTest extends TestCase
         $response = $this->actingAs($coachUser)->getJson('/api/users');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(6);
+        $response->assertJsonCount(6, 'data');
     }
 
     /** @test */
@@ -98,7 +98,7 @@ class ListUsersTest extends TestCase
         $response = $this->actingAs($adminUser)->getJson('/api/users?name=John');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(1);
+        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment(['firstname' => 'John', 'lastname' => 'Doe']);
     }
 
@@ -115,8 +115,8 @@ class ListUsersTest extends TestCase
         $response = $this->actingAs($adminUser)->getJson('/api/users?user_type_id='.$playerUserType->id);
 
         $response->assertStatus(200);
-        $response->assertJsonCount(3);
-        $response->assertJsonFragment(['user_type_id' => $playerUserType->id]);
+        $response->assertJsonCount(3, 'data');
+        $response->assertJsonFragment(['user_type' => ['id' => $playerUserType->id]]);
     }
 
     /** @test */
@@ -137,7 +137,7 @@ class ListUsersTest extends TestCase
         $response = $this->actingAs($adminUser)->getJson('/api/users?team_id='.$teamA->id);
 
         $response->assertStatus(200);
-        $response->assertJsonCount(2);
+        $response->assertJsonCount(2, 'data');
         $response->assertJsonFragment(['id' => $user1->id]);
         $response->assertJsonFragment(['id' => $user2->id]);
     }
@@ -164,7 +164,7 @@ class ListUsersTest extends TestCase
         );
 
         $response->assertStatus(200);
-        $response->assertJsonCount(1);
+        $response->assertJsonCount(1, 'data');
         $response->assertJsonFragment(['id' => $user1->id]);
     }
 }

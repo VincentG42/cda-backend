@@ -40,7 +40,7 @@ class TeamControllerTest extends TestCase
         $response = $this->getJson('/api/teams');
 
         $response->assertStatus(200)
-            ->assertJsonCount(3);
+            ->assertJsonCount(3, 'data');
     }
 
     public function test_can_create_team(): void
@@ -115,6 +115,7 @@ class TeamControllerTest extends TestCase
         $response = $this->postJson("/api/teams/{$team->id}/players", ['user_id' => $player->id]);
 
         $response->assertStatus(200);
+        $response->assertJsonFragment(['id' => $team->id]);
 
         $this->assertDatabaseHas('team_user', [
             'team_id' => $team->id,
@@ -158,6 +159,7 @@ class TeamControllerTest extends TestCase
         $response = $this->postJson("/api/teams/{$team->id}/coach", ['user_id' => $coach->id]);
 
         $response->assertStatus(200);
+        $response->assertJsonFragment(['coach_id' => $coach->id]);
         $this->assertDatabaseHas('teams', ['id' => $team->id, 'coach_id' => $coach->id]);
     }
 
