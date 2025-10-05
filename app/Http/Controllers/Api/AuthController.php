@@ -59,33 +59,26 @@ class AuthController extends Controller
 
     public function myDashboard(Request $request)
     {
-        $user = $request->user();
-        $user->load('teams'); // Load user's teams
+        // Stats for Admin Dashboard
+        $totalUsers = \App\Models\User::count();
+        $activeTeams = \App\Models\Team::count();
+        $matchesThisMonth = \App\Models\Encounter::whereMonth('happens_at', now()->month)->count();
 
-        $upcomingActivities = collect();
-
-        // Get upcoming encounters for the user's teams
-        foreach ($user->teams as $team) {
-            $upcomingEncounters = $team->encounters()
-                ->where('happens_at', '>=', now())
-                ->orderBy('happens_at')
-                ->get();
-            $upcomingActivities = $upcomingActivities->concat($upcomingEncounters);
-        }
-
-        // Get all general upcoming events
+        // Upcoming Events
         $upcomingEvents = \App\Models\Event::where('start_at', '>=', now())
             ->orderBy('start_at')
+            ->limit(5) // Limit for the overview
             ->get();
 
-        $upcomingActivities = $upcomingActivities->concat($upcomingEvents);
+        $upcomingEventsCount = \App\Models\Event::where('start_at', '>=', now())->count();
 
-        // Sort all activities by their date
-        $sortedActivities = $upcomingActivities->sortBy(function ($activity) {
-            return $activity->happens_at ?? $activity->start_at;
-        })->values(); // Re-index the collection
-
-        return response()->json($sortedActivities);
+        return response()->json([
+            'totalUsers' => $totalUsers,
+            'activeTeams' => $activeTeams,
+            'matchesThisMonth' => $matchesThisMonth,
+            'upcomingEventsCount' => $upcomingEventsCount,
+            'upcomingEvents' => $upcomingEvents,
+        ]);
     }
 
     public function forgotPassword(Request $request)

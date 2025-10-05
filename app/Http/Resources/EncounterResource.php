@@ -19,11 +19,11 @@ class EncounterResource extends JsonResource
             'opponent' => $this->opponent,
             'is_at_home' => (bool) $this->is_at_home,
             'happens_at' => $this->happens_at,
+            'time' => $this->happens_at->format('H:i'),
+            'location' => $this->location,
             'is_victory' => $this->is_victory === null ? null : (bool) $this->is_victory,
             'season' => new SeasonResource($this->whenLoaded('season')),
-            'team' => [
-                'id' => $this->team_id,
-            ],
+            'team' => new TeamResource($this->whenLoaded('team')),
         ];
     }
 }

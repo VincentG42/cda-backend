@@ -25,6 +25,8 @@ class EncounterController extends Controller
         $dto = EncounterFilterDTO::fromRequest($request);
         $encounters = $this->encounterService->getFilteredEncounters($dto);
 
+        $encounters->load('team');
+
         return EncounterResource::collection($encounters);
     }
 

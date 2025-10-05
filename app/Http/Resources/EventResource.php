@@ -22,6 +22,12 @@ class EventResource extends JsonResource
             'place' => $this->place,
             'address' => $this->address,
             'additionnal_info' => $this->additionnal_info,
+
+            // Frontend-specific fields
+            'date' => $this->start_at,
+            'time' => $this->start_at->format('H:i'),
+            'location' => $this->place,
+
             'author' => new UserResource($this->whenLoaded('author')),
             // Assuming you have a TagResource
             'tags' => TagResource::collection($this->whenLoaded('tags')),

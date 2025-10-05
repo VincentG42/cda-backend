@@ -31,7 +31,7 @@ class UserController extends Controller
         $users = $this->userService->getFilteredUsers($filterDto);
 
         // Ensure userType is loaded for resource expectations
-        $users->load('userType');
+        $users->load('userType', 'teams.category');
 
         return UserResource::collection($users);
     }
