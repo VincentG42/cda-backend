@@ -7,8 +7,8 @@ use App\Models\User;
 use App\Models\UserType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
-use Illuminate\Testing\Fluent\AssertableJson; // Import AssertableJson
+use Illuminate\Testing\Fluent\AssertableJson;
+use Tests\TestCase; // Import AssertableJson
 
 class ListUsersTest extends TestCase
 {
@@ -116,21 +116,17 @@ class ListUsersTest extends TestCase
         $response = $this->actingAs($adminUser)->getJson('/api/users?user_type_id='.$playerUserType->id);
 
         $response->assertStatus(200);
-        $response->assertJson(fn (AssertableJson $json) =>
-            $json->has('data', 3)
-                 ->has('data.0', fn (AssertableJson $json) =>
-                    $json->where('user_type.id', $playerUserType->id)
-                         ->etc()
-                 )
-                 ->has('data.1', fn (AssertableJson $json) =>
-                    $json->where('user_type.id', $playerUserType->id)
-                         ->etc()
-                 )
-                 ->has('data.2', fn (AssertableJson $json) =>
-                    $json->where('user_type.id', $playerUserType->id)
-                         ->etc()
-                 )
-                 ->etc()
+        $response->assertJson(fn (AssertableJson $json) => $json->has('data', 3)
+            ->has('data.0', fn (AssertableJson $json) => $json->where('user_type.id', $playerUserType->id)
+                ->etc()
+            )
+            ->has('data.1', fn (AssertableJson $json) => $json->where('user_type.id', $playerUserType->id)
+                ->etc()
+            )
+            ->has('data.2', fn (AssertableJson $json) => $json->where('user_type.id', $playerUserType->id)
+                ->etc()
+            )
+            ->etc()
         );
     }
 
