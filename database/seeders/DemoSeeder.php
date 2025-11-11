@@ -9,9 +9,9 @@ use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\UserType;
+use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Faker\Factory as Faker;
 
 class DemoSeeder extends Seeder
 {
@@ -123,7 +123,7 @@ class DemoSeeder extends Seeder
                     'password' => Hash::make('password'),
                     'lastname' => $faker->lastName,
                     'firstname' => $faker->firstName,
-                    'licence_number' => 'LIC' . $faker->unique()->randomNumber(6),
+                    'licence_number' => 'LIC'.$faker->unique()->randomNumber(6),
                     'has_to_change_password' => false,
                 ]
             );
@@ -199,7 +199,7 @@ class DemoSeeder extends Seeder
                 [
                     'season_id' => $currentSeason->id,
                     'team_id' => $team->id,
-                    'opponent' => $faker->company . ' Basketball',
+                    'opponent' => $faker->company.' Basketball',
                     'happens_at' => $dec15->copy()->subDays(rand(1, 30))->addHours(rand(10, 20)),
                 ],
                 [
@@ -216,7 +216,7 @@ class DemoSeeder extends Seeder
                 [
                     'season_id' => $currentSeason->id,
                     'team_id' => $team->id,
-                    'opponent' => $faker->company . ' Basketball',
+                    'opponent' => $faker->company.' Basketball',
                     'happens_at' => $dec15->copy()->addDays(rand(10, 40))->addHours(rand(10, 20)),
                 ],
                 [
@@ -232,7 +232,7 @@ class DemoSeeder extends Seeder
                 [
                     'season_id' => $currentSeason->id,
                     'team_id' => $team->id,
-                    'opponent' => $faker->company . ' Basketball',
+                    'opponent' => $faker->company.' Basketball',
                     'happens_at' => $faker->dateTimeBetween($dec20->copy()->addHours(10), $dec21->copy()->addHours(20)),
                 ],
                 [
