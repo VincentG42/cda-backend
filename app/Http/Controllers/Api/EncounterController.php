@@ -85,4 +85,18 @@ class EncounterController extends Controller
             'parsed_data' => $statsData,
         ]);
     }
+
+    public function updateResult(Request $request, Encounter $encounter): EncounterResource
+    {
+        $this->authorize('update', $encounter);
+
+        $validated = $request->validate([
+            'is_victory' => ['nullable', 'boolean'],
+            // Add other result fields here if needed (e.g., scores)
+        ]);
+
+        $encounter->update($validated);
+
+        return new EncounterResource($encounter->fresh());
+    }
 }

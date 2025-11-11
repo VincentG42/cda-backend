@@ -23,6 +23,7 @@ class UserResource extends JsonResource
             'has_to_change_password' => $this->has_to_change_password,
             'user_type' => [
                 'id' => $this->user_type_id,
+                'name' => $this->userType->name,
             ],
             'teams' => TeamResource::collection($this->whenLoaded('teams')),
             'created_at' => $this->created_at,

@@ -27,7 +27,7 @@ class TeamController extends Controller
         $teams = $this->teamService->getAllTeams();
 
         // Eager-load coach relationship and the count of users (players)
-        $teams->load('coach');
+        $teams->load('coach', 'users');
         $teams->loadCount('users');
 
         return TeamResource::collection($teams);

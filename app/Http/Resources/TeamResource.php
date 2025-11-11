@@ -22,6 +22,7 @@ class TeamResource extends JsonResource
             'coach' => new UserResource($this->whenLoaded('coach')),
             'season' => new SeasonResource($this->whenLoaded('season')),
             'users' => UserResource::collection($this->whenLoaded('users')),
+            'users_count' => $this->users_count,
         ];
     }
 }

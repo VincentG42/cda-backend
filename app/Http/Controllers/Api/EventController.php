@@ -20,7 +20,6 @@ class EventController extends Controller
 
     public function index()
     {
-        $this->authorize('viewAny', Event::class);
         $events = $this->eventService->getUpcomingEvents();
 
         return EventResource::collection($events);

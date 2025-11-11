@@ -16,6 +16,10 @@ Route::post('/contact', [ContactController::class, 'send']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
+// Publicly accessible event routes
+Route::get('/events', [EventController::class, 'index']);
+Route::get('/events/{id}', [EventController::class, 'show']);
+
 // Authenticated routes (any user type)
 Route::middleware(['auth:sanctum'])->group(function () {
     // My Profile
@@ -25,6 +29,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // My Dashboard
     Route::get('/me/dashboard', [AuthController::class, 'myDashboard']);
+
+    // My Matches
+    Route::get('/me/matches', [AuthController::class, 'myMatches']);
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -48,10 +55,10 @@ Route::middleware(['auth:sanctum', 'can:access-admin-panel'])->group(function ()
     Route::delete('/user-types/{id}', [UserTypeController::class, 'destroy']);
 
     // Category
-    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::apiResource('categories', CategoryController::class);
 
     // Season
-    Route::get('/seasons', [SeasonController::class, 'index']);
+    Route::apiResource('seasons', SeasonController::class);
 
     // Team
     Route::apiResource('teams', TeamController::class);
@@ -59,10 +66,11 @@ Route::middleware(['auth:sanctum', 'can:access-admin-panel'])->group(function ()
     Route::delete('teams/{team}/players/{player}', [TeamController::class, 'removePlayer'])->name('teams.players.remove');
     Route::post('teams/{team}/coach', [TeamController::class, 'assignCoach'])->name('teams.coach.assign');
 
-    // Event
-    Route::apiResource('events', EventController::class);
+    // Event (Admin-only actions)
+    Route::apiResource('events', EventController::class)->except(['index', 'show']);
 
     // Encounter
     Route::apiResource('encounters', EncounterController::class);
+    Route::put('encounters/{encounter}/result', [EncounterController::class, 'updateResult'])->name('encounters.updateResult');
     Route::post('encounters/{encounter}/stats', [EncounterController::class, 'uploadStats'])->name('encounters.stats.upload');
 });

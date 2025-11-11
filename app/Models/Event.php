@@ -21,6 +21,11 @@ class Event extends Model
         'address',
     ];
 
+    protected $casts = [
+        'start_at' => 'datetime',
+        'close_at' => 'datetime',
+    ];
+
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');

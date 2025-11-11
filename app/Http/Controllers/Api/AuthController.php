@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\DTOs\LoginDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TeamResource;
+use App\Http\Resources\UserResource;
+use App\Models\UserType;
 use App\Notifications\ResetPasswordNotification;
 use App\Services\UserService;
 use Illuminate\Http\Request;
@@ -30,7 +33,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => new UserResource($user),
             'token' => $token,
         ]);
     }
@@ -52,33 +55,130 @@ class AuthController extends Controller
     public function myTeams(Request $request)
     {
         $user = $request->user();
-        $user->load(['teams.users', 'teams.encounters']); // Load teams, their players, and their encounters
+        $team = $user->teams()->with(['users', 'coach.userType', 'category'])->first();
 
-        return response()->json($user->teams);
+        if (! $team) {
+            return response()->json(null, 200);
+        }
+
+        return new TeamResource($team);
+    }
+
+    public function myMatches(Request $request)
+    {
+        $user = $request->user();
+        $user->load('teams.encounters.team'); // Load the user's team for each encounter
+
+        $upcomingMatches = collect();
+        foreach ($user->teams as $team) {
+            $teamUpcomingMatches = $team->encounters->filter(function ($encounter) {
+                return $encounter->happens_at > now();
+            })->map(function ($encounter) use ($team) {
+                $homeTeamName = $encounter->is_at_home ? $team->name : $encounter->opponent;
+                $awayTeamName = $encounter->is_at_home ? $encounter->opponent : $team->name;
+
+                return [
+                    'id' => $encounter->id,
+                    'home_team' => [
+                        'name' => $homeTeamName,
+                    ],
+                    'away_team' => [
+                        'name' => $awayTeamName,
+                    ],
+                    'happens_at' => $encounter->happens_at,
+                    'is_home_team' => $encounter->is_at_home,
+                    'location' => $encounter->location ?? 'N/A', // Assuming location field exists or default
+                ];
+            });
+            $upcomingMatches = $upcomingMatches->concat($teamUpcomingMatches);
+        }
+
+        return response()->json($upcomingMatches->sortBy('happens_at')->values()->all());
     }
 
     public function myDashboard(Request $request)
     {
-        // Stats for Admin Dashboard
-        $totalUsers = \App\Models\User::count();
-        $activeTeams = \App\Models\Team::count();
-        $matchesThisMonth = \App\Models\Encounter::whereMonth('happens_at', now()->month)->count();
+        $user = $request->user();
 
-        // Upcoming Events
-        $upcomingEvents = \App\Models\Event::where('start_at', '>=', now())
-            ->orderBy('start_at')
-            ->limit(5) // Limit for the overview
-            ->get();
-
-        $upcomingEventsCount = \App\Models\Event::where('start_at', '>=', now())->count();
-
-        return response()->json([
-            'totalUsers' => $totalUsers,
-            'activeTeams' => $activeTeams,
-            'matchesThisMonth' => $matchesThisMonth,
-            'upcomingEventsCount' => $upcomingEventsCount,
-            'upcomingEvents' => $upcomingEvents,
+        // Determine if the user has an admin-level role
+        $isAdminOrStaff = in_array($user->userType->name, [
+            UserType::ADMIN,
+            UserType::PRESIDENT,
+            UserType::STAFF,
+            UserType::COACH,
         ]);
+
+        if ($isAdminOrStaff) {
+            // Admin Dashboard Stats
+            $totalUsers = \App\Models\User::count();
+            $activeTeams = \App\Models\Team::count();
+            $matchesThisMonth = \App\Models\Encounter::whereMonth('happens_at', now()->month)->count();
+
+            $upcomingEvents = \App\Models\Event::where('start_at', '>=', now())
+                ->orderBy('start_at')
+                ->limit(5)
+                ->get();
+
+            return response()->json([
+                'totalUsers' => $totalUsers,
+                'activeTeams' => $activeTeams,
+                'matchesThisMonth' => $matchesThisMonth,
+                'upcomingEventsCount' => $upcomingEvents->count(),
+                'upcomingEvents' => $upcomingEvents, // For admin dashboard events list
+            ]);
+        } else {
+            // User Dashboard Stats
+            $user->load('teams.encounters.team');
+
+            $upcomingMatches = collect();
+            foreach ($user->teams as $team) {
+                $teamUpcomingMatches = $team->encounters->filter(function ($encounter) {
+                    return $encounter->happens_at > now();
+                })->map(function ($encounter) use ($team) {
+                    $homeTeamName = $encounter->is_at_home ? $team->name : $encounter->opponent;
+                    $awayTeamName = $encounter->is_at_home ? $encounter->opponent : $team->name;
+
+                    return [
+                        'id' => $encounter->id,
+                        'home_team' => [
+                            'name' => $homeTeamName,
+                            'id' => $encounter->is_at_home ? $team->id : null,
+                        ],
+                        'away_team' => [
+                            'name' => $awayTeamName,
+                            'id' => $encounter->is_at_home ? null : $team->id,
+                        ],
+                        'happens_at' => $encounter->happens_at,
+                        'is_home_team' => $encounter->is_at_home,
+                        'location' => $encounter->location ?? 'N/A',
+                    ];
+                });
+                $upcomingMatches = $upcomingMatches->concat($teamUpcomingMatches);
+            }
+
+            $upcomingMatches = $upcomingMatches->sortBy('happens_at')->take(5)->values()->all();
+
+            // Placeholder for individual stats for now
+            $matchesPlayed = 0;
+            $wins = 0;
+            $nextMatchDate = 'N/A';
+            $avgPoints = 0;
+
+            // Upcoming Events (global, as before)
+            $upcomingEvents = \App\Models\Event::where('start_at', '>=', now())
+                ->orderBy('start_at')
+                ->limit(5)
+                ->get();
+
+            return response()->json([
+                'matchesPlayed' => $matchesPlayed,
+                'wins' => $wins,
+                'nextMatchDate' => $nextMatchDate,
+                'avgPoints' => $avgPoints,
+                'upcomingMatches' => $upcomingMatches,
+                'recentEvents' => $upcomingEvents,
+            ]);
+        }
     }
 
     public function forgotPassword(Request $request)
