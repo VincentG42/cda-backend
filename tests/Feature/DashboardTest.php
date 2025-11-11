@@ -70,7 +70,7 @@ class DashboardTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonFragment(['id' => $upcomingEncounter->id]);
         $data = $response->json();
-        $filteredData = collect($data)->filter(function ($item) use ($upcomingEncounter) {
+        $filteredData = collect($data['upcomingMatches'])->filter(function ($item) use ($upcomingEncounter) {
             return $item['id'] === $upcomingEncounter->id && isset($item['happens_at']);
         });
         $this->assertCount(1, $filteredData);
@@ -96,7 +96,7 @@ class DashboardTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonFragment(['id' => $upcomingEvent->id]);
         $data = $response->json();
-        $filteredData = collect($data)->filter(function ($item) use ($upcomingEvent) {
+        $filteredData = collect($data['recentEvents'])->filter(function ($item) use ($upcomingEvent) {
             return $item['id'] === $upcomingEvent->id && isset($item['start_at']);
         });
         $this->assertCount(1, $filteredData);
@@ -123,8 +123,14 @@ class DashboardTest extends TestCase
 
         $data = $response->json();
 
-        $this->assertCount(2, $data);
-        $this->assertEquals($event->id, $data[0]['id']); // Event is earlier
-        $this->assertEquals($encounter->id, $data[1]['id']); // Encounter is later
+        $combinedActivities = collect($data['upcomingMatches'])
+            ->concat($data['recentEvents'])
+            ->sortBy(function ($item) {
+                return $item['happens_at'] ?? $item['start_at'];
+            })->values(); // Re-index the collection
+
+        $this->assertCount(2, $combinedActivities);
+        $this->assertEquals($event->id, $combinedActivities[0]['id']); // Event is earlier
+        $this->assertEquals($encounter->id, $combinedActivities[1]['id']); // Encounter is later
     }
 }

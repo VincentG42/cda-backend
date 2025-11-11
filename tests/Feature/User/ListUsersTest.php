@@ -8,6 +8,7 @@ use App\Models\UserType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use Illuminate\Testing\Fluent\AssertableJson; // Import AssertableJson
 
 class ListUsersTest extends TestCase
 {
@@ -90,7 +91,7 @@ class ListUsersTest extends TestCase
     /** @test */
     public function admin_can_filter_users_by_name(): void
     {
-        $adminUser = User::factory()->for(UserType::where('name', UserType::ADMIN)->first(), 'userType')->create();
+        $adminUser = User::factory()->for(UserType::where('name', UserType::ADMIN)->first(), 'userType')->create(['firstname' => 'Admin', 'lastname' => 'User']);
         User::factory()->create(['firstname' => 'John', 'lastname' => 'Doe', 'user_type_id' => UserType::where('name', UserType::PLAYER)->first()->id]);
         User::factory()->create(['firstname' => 'Jane', 'lastname' => 'Smith', 'user_type_id' => UserType::where('name', UserType::PLAYER)->first()->id]);
         User::factory()->create(['firstname' => 'Peter', 'lastname' => 'Jones', 'user_type_id' => UserType::where('name', UserType::COACH)->first()->id]);
@@ -115,8 +116,22 @@ class ListUsersTest extends TestCase
         $response = $this->actingAs($adminUser)->getJson('/api/users?user_type_id='.$playerUserType->id);
 
         $response->assertStatus(200);
-        $response->assertJsonCount(3, 'data');
-        $response->assertJsonFragment(['user_type' => ['id' => $playerUserType->id]]);
+        $response->assertJson(fn (AssertableJson $json) =>
+            $json->has('data', 3)
+                 ->has('data.0', fn (AssertableJson $json) =>
+                    $json->where('user_type.id', $playerUserType->id)
+                         ->etc()
+                 )
+                 ->has('data.1', fn (AssertableJson $json) =>
+                    $json->where('user_type.id', $playerUserType->id)
+                         ->etc()
+                 )
+                 ->has('data.2', fn (AssertableJson $json) =>
+                    $json->where('user_type.id', $playerUserType->id)
+                         ->etc()
+                 )
+                 ->etc()
+        );
     }
 
     /** @test */

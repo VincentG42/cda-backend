@@ -66,8 +66,8 @@ class EncounterFilteringTest extends TestCase
         $response = $this->getJson("/api/encounters?team_id={$this->team1->id}&filter=all");
         $response->assertStatus(200);
         $response->assertJsonCount(2, 'data');
-        $response->assertJsonFragment(['team' => ['id' => $this->team1->id]]);
-        $response->assertJsonMissing(['team' => ['id' => $this->team2->id]]);
+        $response->assertJsonFragment(['team_id' => $this->team1->id]); // Modified
+        $response->assertJsonMissing(['team_id' => $this->team2->id]); // Modified
     }
 
     /** @test */
@@ -106,8 +106,8 @@ class EncounterFilteringTest extends TestCase
         $response = $this->getJson("/api/encounters?team_id={$this->team1->id}&filter=past");
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
-        $response->assertJsonFragment(['team' => ['id' => $this->team1->id]]);
-        $response->assertJsonMissing(['team' => ['id' => $this->team2->id]]);
+        $response->assertJsonFragment(['team_id' => $this->team1->id]); // Modified
+        $response->assertJsonMissing(['team_id' => $this->team2->id]); // Modified
         $response->assertJsonMissing(
             ['happens_at' => Encounter::where('team_id', $this->team1->id)->where('happens_at', '>=', now())->first()->happens_at->toDateTimeString()]
         );
@@ -119,8 +119,8 @@ class EncounterFilteringTest extends TestCase
         $response = $this->getJson("/api/encounters?team_id={$this->team2->id}&filter=upcoming");
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
-        $response->assertJsonFragment(['team' => ['id' => $this->team2->id]]);
-        $response->assertJsonMissing(['team' => ['id' => $this->team1->id]]);
+        $response->assertJsonFragment(['team_id' => $this->team2->id]); // Modified
+        $response->assertJsonMissing(['team_id' => $this->team1->id]); // Modified
         $response->assertJsonMissing(
             ['happens_at' => Encounter::where('team_id', $this->team2->id)->where('happens_at', '<', now())->first()->happens_at->toDateTimeString()]
         );
