@@ -28,12 +28,29 @@ class UserFactory extends Factory
         return [
             'email' => $this->faker->unique()->safeEmail(),
             'password' => bcrypt('password'),
-            'user_type_id' => UserType::factory(),
+            'user_type_id' => null, // Set to null by default
             'lastname' => $this->faker->lastName(),
             'firstname' => $this->faker->firstName(),
             'licence_number' => $this->faker->optional()->bothify('LIC-####'),
             'has_to_change_password' => $this->faker->boolean(),
         ];
+    }
+
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (User $user) {
+            if (is_null($user->user_type_id)) {
+                $user->user_type_id = UserType::factory()->create()->id;
+            }
+        })->afterCreating(function (User $user) {
+            if (is_null($user->user_type_id)) {
+                $user->user_type_id = UserType::factory()->create()->id;
+                $user->save();
+            }
+        });
     }
 
     /**

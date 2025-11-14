@@ -73,4 +73,8 @@ Route::middleware(['auth:sanctum', 'can:access-admin-panel'])->group(function ()
     Route::apiResource('encounters', EncounterController::class);
     Route::put('encounters/{encounter}/result', [EncounterController::class, 'updateResult'])->name('encounters.updateResult');
     Route::post('encounters/{encounter}/stats', [EncounterController::class, 'uploadStats'])->name('encounters.stats.upload');
+
+    // Match Recap Import
+    Route::post('/matches/{encounter}/recap/prepare', [App\Http\Controllers\Api\MatchRecapController::class, 'prepareRecap']);
+    Route::post('/matches/{encounter}/recap/import', [App\Http\Controllers\Api\MatchRecapController::class, 'importRecap']);
 });

@@ -18,6 +18,8 @@ class Encounter extends Model
         'is_at_home',
         'happens_at',
         'is_victory',
+        'team_score',
+        'opponent_score',
     ];
 
     protected $casts = [
