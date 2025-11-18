@@ -20,7 +20,22 @@ class TeamPolicy
      */
     public function view(User $user, Team $team): bool
     {
-        return $user->can('access-admin-panel');
+        // Admin-level users can view any team.
+        if ($user->can('access-admin-panel')) {
+            return true;
+        }
+
+        // A coach can view their own team.
+        if (strtolower($user->userType->name) === 'coach') {
+            return $user->id === $team->coach_id;
+        }
+
+        // A player can view a team they are a member of.
+        if (strtolower($user->userType->name) === 'player') {
+            return $user->teams()->where('team_id', $team->id)->exists();
+        }
+
+        return false;
     }
 
     /**

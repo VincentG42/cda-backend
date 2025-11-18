@@ -57,6 +57,7 @@ class MatchRecapController extends Controller
         }
 
         return response()->json([
+            'recap_data' => $data, // Include the full parsed JSON data
             'matched' => $matched,
             'unmatched' => $unmatched,
             'official_players' => $officialPlayers->map(function ($user) {

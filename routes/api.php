@@ -20,6 +20,42 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
 
+// TEMPORARY PUBLIC TEST ROUTE - NO AUTH, NO POLICY
+Route::get('/public-test-team-1', function () {
+    $team = \App\Models\Team::find(1);
+    if (!$team) {
+        return response()->json(['message' => 'Team 1 not found in public test'], 404);
+    }
+
+    $teamStatsService = app(\App\Domain\Statistics\Services\TeamStatsService::class);
+
+    $overview = $teamStatsService->getSeasonOverview($team);
+    $analysis = $teamStatsService->getPointsConcededAnalysis($team);
+
+    return response()->json([
+        'overview' => $overview,
+        'analysis' => $analysis,
+    ]);
+});
+
+Route::get('/public-test-team-stats', function () {
+    $team = \App\Models\Team::find(1); // Hardcode team ID 1
+    if (!$team) {
+        return response()->json(['message' => 'Team 1 not found for stats test'], 404);
+    }
+
+    $teamStatsService = app(\App\Domain\Statistics\Services\TeamStatsService::class);
+
+    $overview = $teamStatsService->getSeasonOverview($team);
+    $analysis = $teamStatsService->getPointsConcededAnalysis($team);
+
+    return response()->json([
+        'overview' => $overview,
+        'analysis' => $analysis,
+    ]);
+});
+// END TEMPORARY PUBLIC TEST ROUTE
+
 // Authenticated routes (any user type)
 Route::middleware(['auth:sanctum'])->group(function () {
     // My Profile
@@ -32,6 +68,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // My Matches
     Route::get('/me/matches', [AuthController::class, 'myMatches']);
+
+    // Player Stats
+    Route::get('/players/{user}/stats/averages', [App\Http\Controllers\Api\PlayerStatsController::class, 'getAverages']);
+    Route::get('/players/{user}/stats/historical/{stat}', [App\Http\Controllers\Api\PlayerStatsController::class, 'getHistorical'])->where('stat', '[a-zA-Z]+');
+    Route::get('/players/{user}/match/{encounter}/stats', [App\Http\Controllers\Api\PlayerStatsController::class, 'getMatchStats']);
+
+    // Team Stats
+    Route::get('/teams/{team}/stats/overview', [App\Http\Controllers\Api\TeamStatsController::class, 'getOverview']);
+    Route::get('/teams/{team}/stats/analysis', [App\Http\Controllers\Api\TeamStatsController::class, 'getAnalysis']);
+
+    // User & Team Resources (accessible by authenticated users, controlled by policies)
+    Route::apiResource('users', UserController::class)->except(['index', 'store', 'destroy']);
+    Route::apiResource('teams', TeamController::class)->except(['index', 'store', 'destroy']);
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout']);

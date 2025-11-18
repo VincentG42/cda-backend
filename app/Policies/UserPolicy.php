@@ -12,7 +12,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return in_array($user->userType->name, [UserType::PRESIDENT, UserType::STAFF, UserType::COACH]);
+        return in_array($user->userType->name, [UserType::ADMIN, UserType::PRESIDENT, UserType::STAFF, UserType::COACH]);
     }
 
     /**
@@ -20,11 +20,28 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
+        // A user can always view their own profile.
         if ($user->id === $model->id) {
             return true;
         }
 
-        return in_array($user->userType->name, [UserType::PRESIDENT, UserType::STAFF, UserType::COACH]);
+        // Admins, Presidents, and Staff can view any profile.
+        if (in_array(strtolower($user->userType->name), ['admin', 'president', 'staff'])) {
+            return true;
+        }
+
+        // A coach can view a player if they are on the same team.
+        if (strtolower($user->userType->name) === 'coach') {
+            // Get the teams of the coach
+            $coachTeams = $user->teams()->pluck('id');
+            // Get the teams of the player being viewed
+            $playerTeams = $model->teams()->pluck('id');
+
+            // Check if there is any intersection between the two sets of teams.
+            return $coachTeams->intersect($playerTeams)->isNotEmpty();
+        }
+
+        return false;
     }
 
     /**

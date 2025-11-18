@@ -19,6 +19,8 @@ class UpdateEncounterDTO
             'is_at_home' => 'sometimes|required|boolean',
             'happens_at' => 'sometimes|required|date',
             'is_victory' => 'nullable|boolean',
+            'team_score' => 'nullable|integer',
+            'opponent_score' => 'nullable|integer',
         ]);
 
         return new self($validated);

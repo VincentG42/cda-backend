@@ -69,11 +69,9 @@ class AuthController extends Controller
         $user = $request->user();
         $user->load('teams.encounters.team'); // Load the user's team for each encounter
 
-        $upcomingMatches = collect();
+        $allMatches = collect();
         foreach ($user->teams as $team) {
-            $teamUpcomingMatches = $team->encounters->filter(function ($encounter) {
-                return $encounter->happens_at > now();
-            })->map(function ($encounter) use ($team) {
+            $teamMatches = $team->encounters->map(function ($encounter) use ($team) {
                 $homeTeamName = $encounter->is_at_home ? $team->name : $encounter->opponent;
                 $awayTeamName = $encounter->is_at_home ? $encounter->opponent : $team->name;
 
@@ -85,15 +83,19 @@ class AuthController extends Controller
                     'away_team' => [
                         'name' => $awayTeamName,
                     ],
-                    'happens_at' => $encounter->happens_at,
+                    'date' => $encounter->happens_at, // Keep original for sorting
+                    'time' => \Carbon\Carbon::parse($encounter->happens_at)->format('H:i'),
                     'is_home_team' => $encounter->is_at_home,
-                    'location' => $encounter->location ?? 'N/A', // Assuming location field exists or default
+                    'location' => $encounter->location ?? 'N/A',
+                    'team_score' => $encounter->team_score,
+                    'opponent_score' => $encounter->opponent_score,
+                    'is_victory' => $encounter->is_victory === null ? null : (bool) $encounter->is_victory,
                 ];
             });
-            $upcomingMatches = $upcomingMatches->concat($teamUpcomingMatches);
+            $allMatches = $allMatches->concat($teamMatches);
         }
 
-        return response()->json($upcomingMatches->sortBy('happens_at')->values()->all());
+        return response()->json($allMatches->sortBy('date')->values()->all());
     }
 
     public function myDashboard(Request $request)
@@ -128,43 +130,27 @@ class AuthController extends Controller
             ]);
         } else {
             // User Dashboard Stats
-            $user->load('teams.encounters.team');
+            $user->load('teams.encounters');
 
-            $upcomingMatches = collect();
-            foreach ($user->teams as $team) {
-                $teamUpcomingMatches = $team->encounters->filter(function ($encounter) {
-                    return $encounter->happens_at > now();
-                })->map(function ($encounter) use ($team) {
-                    $homeTeamName = $encounter->is_at_home ? $team->name : $encounter->opponent;
-                    $awayTeamName = $encounter->is_at_home ? $encounter->opponent : $team->name;
+            $allEncounters = $user->teams->flatMap(function ($team) {
+                return $team->encounters;
+            });
 
-                    return [
-                        'id' => $encounter->id,
-                        'home_team' => [
-                            'name' => $homeTeamName,
-                            'id' => $encounter->is_at_home ? $team->id : null,
-                        ],
-                        'away_team' => [
-                            'name' => $awayTeamName,
-                            'id' => $encounter->is_at_home ? null : $team->id,
-                        ],
-                        'happens_at' => $encounter->happens_at,
-                        'is_home_team' => $encounter->is_at_home,
-                        'location' => $encounter->location ?? 'N/A',
-                    ];
-                });
-                $upcomingMatches = $upcomingMatches->concat($teamUpcomingMatches);
-            }
+            $pastEncounters = $allEncounters->where('happens_at', '<', now())
+                                             ->whereNotNull('team_score');
 
-            $upcomingMatches = $upcomingMatches->sortBy('happens_at')->take(5)->values()->all();
+            $upcomingEncounters = $allEncounters->where('happens_at', '>=', now());
 
-            // Placeholder for individual stats for now
-            $matchesPlayed = 0;
-            $wins = 0;
-            $nextMatchDate = 'N/A';
+            $matchesPlayed = $pastEncounters->count();
+            $wins = $pastEncounters->where('is_victory', true)->count();
+
+            $nextMatch = $upcomingEncounters->sortBy('happens_at')->first();
+            $nextMatchDate = $nextMatch ? $nextMatch->happens_at->format('d/m/Y') : 'N/A';
+
+            // Placeholder for avgPoints as it requires deeper JSON processing
             $avgPoints = 0;
 
-            // Upcoming Events (global, as before)
+            // Upcoming Events (global)
             $upcomingEvents = \App\Models\Event::where('start_at', '>=', now())
                 ->orderBy('start_at')
                 ->limit(5)
@@ -175,7 +161,7 @@ class AuthController extends Controller
                 'wins' => $wins,
                 'nextMatchDate' => $nextMatchDate,
                 'avgPoints' => $avgPoints,
-                'upcomingMatches' => $upcomingMatches,
+                'upcomingMatches' => \App\Http\Resources\EncounterResource::collection($upcomingEncounters->take(5)),
                 'recentEvents' => $upcomingEvents,
             ]);
         }

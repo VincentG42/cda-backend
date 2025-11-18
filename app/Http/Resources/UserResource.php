@@ -26,6 +26,7 @@ class UserResource extends JsonResource
                 'name' => $this->userType->name,
             ],
             'teams' => TeamResource::collection($this->whenLoaded('teams')),
+            'individual_stats' => IndividualStatResource::collection($this->whenLoaded('individualStats')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

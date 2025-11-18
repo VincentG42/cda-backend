@@ -32,6 +32,8 @@ class EncounterResource extends JsonResource
             'happens_at' => $this->happens_at,
             'time' => $this->happens_at->format('H:i'),
             'location' => $this->location,
+            'team_score' => $this->team_score,
+            'opponent_score' => $this->opponent_score,
             'is_victory' => $this->is_victory === null ? null : (bool) $this->is_victory,
             'season' => new SeasonResource($this->whenLoaded('season')),
             'season_id' => $this->season_id,

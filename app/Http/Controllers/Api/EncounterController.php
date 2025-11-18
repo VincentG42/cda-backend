@@ -27,6 +27,11 @@ class EncounterController extends Controller
 
         $encounters->load('team');
 
+        // Ensure each encounter model is refreshed to get the latest scores and victory status
+        $encounters->each(function ($encounter) {
+            $encounter->refresh();
+        });
+
         return EncounterResource::collection($encounters);
     }
 

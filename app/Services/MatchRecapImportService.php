@@ -16,10 +16,13 @@ class MatchRecapImportService
     public function execute(Encounter $encounter, array $recapData, array $mappings): void
     {
         DB::transaction(function () use ($encounter, $recapData, $mappings) {
-            // 1. Update encounter score
+            // 1. Update encounter score and victory status
+            $isVictory = $recapData['score']['team'] > $recapData['score']['opponent'];
+
             $encounter->update([
                 'team_score' => $recapData['score']['team'],
                 'opponent_score' => $recapData['score']['opponent'],
+                'is_victory' => $isVictory,
             ]);
 
             // 2. Store raw JSON recap

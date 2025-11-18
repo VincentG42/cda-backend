@@ -24,7 +24,7 @@ class EncounterRepository implements EncounterRepositoryInterface
             $query->where('happens_at', '>=', now());
         }
 
-        return $query->orderBy('happens_at')->paginate(15);
+        return $query->orderByDesc('happens_at')->paginate(15);
     }
 
     public function create(CreateEncounterDTO $dto): Encounter

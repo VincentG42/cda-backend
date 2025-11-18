@@ -61,6 +61,9 @@ class UserController extends Controller
 
         $this->authorize('view', $user);
 
+        // Eager load individual stats and their associated encounters
+        $user->load('individualStats.encounter');
+
         return new UserResource($user);
     }
 
