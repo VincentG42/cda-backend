@@ -10,9 +10,6 @@ class PlayerStatsService
 {
     /**
      * Calculate the average performance statistics for a given player.
-     *
-     * @param User $player
-     * @return PlayerStatsDTO
      */
     public function getAverageStats(User $player): PlayerStatsDTO
     {
@@ -85,10 +82,6 @@ class PlayerStatsService
 
     /**
      * Get historical data for a specific stat for a player.
-     *
-     * @param User $player
-     * @param string $statName
-     * @return Collection
      */
     public function getHistoricalStats(User $player, string $statName): Collection
     {
@@ -101,7 +94,7 @@ class PlayerStatsService
             ->map(function ($statRecord) use ($statName) {
                 $data = json_decode($statRecord->json, true);
                 $events = collect($data['events'] ?? []);
-                
+
                 $value = match ($statName) {
                     'points' => $events->where('type', 'shoot')->where('successful', true)->sum('points'),
                     'rebounds' => $events->where('type', 'rebound')->count(),
@@ -124,7 +117,7 @@ class PlayerStatsService
     {
         $statRecord = $player->individualStats()->where('encounter_id', $encounter->id)->first();
 
-        if (!$statRecord) {
+        if (! $statRecord) {
             return [];
         }
 
@@ -138,11 +131,11 @@ class PlayerStatsService
             $periodEvents = $groupedByPeriod->get($i, collect());
             $periodTotals = [
                 'period' => $i,
-                'points' => 0, 'rebounds' => 0, 'assists' => 0, 'steals' => 0, 'turnovers' => 0, 'fouls' => 0
+                'points' => 0, 'rebounds' => 0, 'assists' => 0, 'steals' => 0, 'turnovers' => 0, 'fouls' => 0,
             ];
 
             foreach ($periodEvents as $event) {
-                 switch ($event['type']) {
+                switch ($event['type']) {
                     case 'rebound':
                         $periodTotals['rebounds']++;
                         break;
@@ -173,9 +166,6 @@ class PlayerStatsService
 
     /**
      * Helper to process a 'shoot' event and update totals.
-     *
-     * @param array $event
-     * @param array &$totals
      */
     private function processShootEvent(array $event, array &$totals): void
     {
@@ -213,6 +203,7 @@ class PlayerStatsService
         if ($count === 0) {
             return 0.0;
         }
+
         return round($total / $count, 1);
     }
 
@@ -224,6 +215,7 @@ class PlayerStatsService
         if ($attempted === 0) {
             return 0.0;
         }
+
         return round(($made / $attempted) * 100, 1);
     }
 

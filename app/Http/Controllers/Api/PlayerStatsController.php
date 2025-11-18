@@ -23,7 +23,7 @@ class PlayerStatsController extends Controller
     public function getHistorical(User $user, string $stat): JsonResponse
     {
         $allowedStats = ['points', 'rebounds', 'assists', 'steals', 'turnovers', 'fouls'];
-        if (!in_array($stat, $allowedStats)) {
+        if (! in_array($stat, $allowedStats)) {
             return response()->json(['error' => 'Invalid stat requested.'], 400);
         }
 

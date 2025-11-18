@@ -23,7 +23,7 @@ Route::get('/events/{id}', [EventController::class, 'show']);
 // TEMPORARY PUBLIC TEST ROUTE - NO AUTH, NO POLICY
 Route::get('/public-test-team-1', function () {
     $team = \App\Models\Team::find(1);
-    if (!$team) {
+    if (! $team) {
         return response()->json(['message' => 'Team 1 not found in public test'], 404);
     }
 
@@ -40,7 +40,7 @@ Route::get('/public-test-team-1', function () {
 
 Route::get('/public-test-team-stats', function () {
     $team = \App\Models\Team::find(1); // Hardcode team ID 1
-    if (!$team) {
+    if (! $team) {
         return response()->json(['message' => 'Team 1 not found for stats test'], 404);
     }
 

@@ -137,7 +137,7 @@ class AuthController extends Controller
             });
 
             $pastEncounters = $allEncounters->where('happens_at', '<', now())
-                                             ->whereNotNull('team_score');
+                ->whereNotNull('team_score');
 
             $upcomingEncounters = $allEncounters->where('happens_at', '>=', now());
 

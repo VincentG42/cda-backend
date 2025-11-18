@@ -18,13 +18,13 @@ class TeamStatsController extends Controller
 
     /**
      * @group Statistics
+     *
      * @route GET /api/teams/{team}/stats/overview
-     * @param Team $team
-     * @return JsonResponse
      */
     public function getOverview(Team $team): JsonResponse
     {
         $stats = $this->teamStatsService->getSeasonOverview($team);
+
         return response()->json($stats);
     }
 }
