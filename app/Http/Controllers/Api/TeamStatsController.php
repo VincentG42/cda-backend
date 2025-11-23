@@ -27,4 +27,18 @@ class TeamStatsController extends Controller
 
         return response()->json($stats);
     }
+
+    public function getAnalysis(Team $team): JsonResponse
+    {
+        $analysis = $this->teamStatsService->getPointsConcededAnalysis($team);
+
+        return response()->json($analysis);
+    }
+
+    public function getShooting(Team $team): JsonResponse
+    {
+        $shootingStats = $this->teamStatsService->getTeamShootingStats($team);
+
+        return response()->json($shootingStats);
+    }
 }

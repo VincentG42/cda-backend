@@ -77,6 +77,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Team Stats
     Route::get('/teams/{team}/stats/overview', [App\Http\Controllers\Api\TeamStatsController::class, 'getOverview']);
     Route::get('/teams/{team}/stats/analysis', [App\Http\Controllers\Api\TeamStatsController::class, 'getAnalysis']);
+    Route::get('/teams/{team}/stats/shooting', [App\Http\Controllers\Api\TeamStatsController::class, 'getShooting']);
 
     // User & Team Resources (accessible by authenticated users, controlled by policies)
     Route::apiResource('users', UserController::class)->except(['index', 'store', 'destroy']);

@@ -30,6 +30,8 @@ class AuthController extends Controller
             ], 401);
         }
 
+        $user->load('teams');
+
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
@@ -49,7 +51,9 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user();
+        $user->load('teams');
+        return response()->json($user);
     }
 
     public function myTeams(Request $request)
