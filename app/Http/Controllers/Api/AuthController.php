@@ -53,6 +53,7 @@ class AuthController extends Controller
     {
         $user = $request->user();
         $user->load('teams');
+
         return response()->json($user);
     }
 

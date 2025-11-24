@@ -18,10 +18,16 @@ class MatchRecapController extends Controller
     public function prepareRecap(Request $request, string $encounter_id): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'recapFile' => 'required|file|mimes:json',
+            'recapFile' => 'required|file',
         ]);
 
         if ($validator->fails()) {
+            \Illuminate\Support\Facades\Log::error('Recap validation failed', [
+                'errors' => $validator->errors()->toArray(),
+                'files' => $request->allFiles(),
+                'post' => $request->all(),
+            ]);
+
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
