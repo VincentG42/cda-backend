@@ -14,5 +14,5 @@ $tokens = DB::table('password_reset_tokens')->orderBy('created_at', 'desc')->lim
 
 echo "Last 5 password reset tokens:\n";
 foreach ($tokens as $token) {
-    echo "Email: " . $token->email . " | Created at: " . $token->created_at . "\n";
+    echo 'Email: '.$token->email.' | Created at: '.$token->created_at."\n";
 }

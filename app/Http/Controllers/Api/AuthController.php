@@ -10,7 +10,6 @@ use App\Models\UserType;
 use App\Notifications\ResetPasswordNotification;
 use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
@@ -24,7 +23,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $dto = LoginDTO::fromRequest($request);
-        
+
         // Assuming $dto contains 'email' and 'password' for credentials
         $credentials = [
             'email' => $dto->email,
@@ -40,7 +39,7 @@ class AuthController extends Controller
                     'message' => 'Password change required',
                     'require_password_change' => true,
                     'user' => new UserResource($user),
-                    'token' => $user->createToken('auth_token')->plainTextToken
+                    'token' => $user->createToken('auth_token')->plainTextToken,
                 ], 200);
             }
 
@@ -76,7 +75,7 @@ class AuthController extends Controller
 
         $user = $request->user();
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return response()->json(['message' => 'Mot de passe actuel incorrect'], 422);
         }
 

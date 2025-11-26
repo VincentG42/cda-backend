@@ -74,10 +74,10 @@ class UserService
         // Send welcome email
         try {
             // Assuming frontend URL is in .env or hardcoded for now
-            $loginUrl = config('app.frontend_url', 'http://localhost:5173') . '/login';
+            $loginUrl = config('app.frontend_url', 'http://localhost:5173').'/login';
             Mail::to($user->email)->send(new WelcomeEmail($user, $password, $loginUrl));
         } catch (\Exception $e) {
-            Log::error('Failed to send welcome email: ' . $e->getMessage());
+            Log::error('Failed to send welcome email: '.$e->getMessage());
         }
 
         return $user;
