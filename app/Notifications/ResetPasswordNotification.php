@@ -2,15 +2,11 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class ResetPasswordNotification extends Notification implements ShouldQueue
+class ResetPasswordNotification extends Notification
 {
-    use Queueable;
-
     public function __construct(private string $token) {}
 
     public function via(object $notifiable): array
@@ -20,7 +16,8 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $url = url('/reset-password?token='.$this->token.'&email='.urlencode($notifiable->email));
+        $frontendUrl = config('app.frontend_url', 'http://localhost:4321');
+        $url = $frontendUrl . '/reset-password?token=' . $this->token . '&email=' . urlencode($notifiable->email);
 
         return (new MailMessage)
             ->subject(__('Reset Password Notification'))

@@ -6,11 +6,15 @@ use App\DTOs\CreateUserDTO;
 use App\DTOs\LoginDTO;
 use App\DTOs\UpdateUserDTO;
 use App\DTOs\UserFilterDTO;
+use App\Mail\WelcomeEmail;
 use App\Models\User;
 use App\Repositories\UserRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class UserService
 {
@@ -54,12 +58,29 @@ class UserService
 
     public function createUser(CreateUserDTO $dto): User
     {
-        $data = $dto->toArray();
+        // Generate a random password
+        $password = Str::password(10);
 
-        // Logique métier : hash du mot de passe
-        $data['password'] = Hash::make($data['password']);
+        $user = User::create([
+            'email' => $dto->email,
+            'password' => Hash::make($password),
+            'lastname' => $dto->lastname,
+            'firstname' => $dto->firstname,
+            'licence_number' => $dto->licenceNumber,
+            'user_type_id' => $dto->userTypeId,
+            'has_to_change_password' => true,
+        ]);
 
-        return $this->userRepository->create($data);
+        // Send welcome email
+        try {
+            // Assuming frontend URL is in .env or hardcoded for now
+            $loginUrl = config('app.frontend_url', 'http://localhost:5173') . '/login';
+            Mail::to($user->email)->send(new WelcomeEmail($user, $password, $loginUrl));
+        } catch (\Exception $e) {
+            Log::error('Failed to send welcome email: ' . $e->getMessage());
+        }
+
+        return $user;
     }
 
     public function updateUser(int $id, UpdateUserDTO $dto): bool

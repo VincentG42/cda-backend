@@ -28,6 +28,10 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
+        \Illuminate\Auth\Notifications\ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
+            return config('app.frontend_url', 'http://localhost:4321') . "/reset-password?token={$token}&email={$notifiable->getEmailForPasswordReset()}";
+        });
+
         Gate::before(function ($user, $ability) {
             if ($user->userType->name === UserType::ADMIN) {
                 return true;

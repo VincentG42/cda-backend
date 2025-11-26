@@ -8,7 +8,6 @@ class CreateUserDTO
 {
     public function __construct(
         public readonly string $email,
-        public readonly string $password,
         public readonly int $userTypeId,
         public readonly string $lastname,
         public readonly string $firstname,
@@ -20,7 +19,6 @@ class CreateUserDTO
     {
         $validated = $request->validate([
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
             'user_type_id' => 'required|exists:user_types,id',
             'lastname' => 'required|string',
             'firstname' => 'required|string',
@@ -30,7 +28,6 @@ class CreateUserDTO
 
         return new self(
             email: $validated['email'],
-            password: $validated['password'],
             userTypeId: $validated['user_type_id'],
             lastname: $validated['lastname'],
             firstname: $validated['firstname'],
@@ -43,7 +40,6 @@ class CreateUserDTO
     {
         return [
             'email' => $this->email,
-            'password' => $this->password,
             'user_type_id' => $this->userTypeId,
             'lastname' => $this->lastname,
             'firstname' => $this->firstname,

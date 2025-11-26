@@ -10,6 +10,8 @@ use App\Models\UserType;
 use App\Notifications\ResetPasswordNotification;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 
@@ -22,31 +24,67 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $dto = LoginDTO::fromRequest($request);
-        $user = $this->userService->authenticateUser($dto);
+        
+        // Assuming $dto contains 'email' and 'password' for credentials
+        $credentials = [
+            'email' => $dto->email,
+            'password' => $dto->password,
+        ];
 
-        if (! $user) {
+        $user = \App\Models\User::where('email', $credentials['email'])->first();
+
+        if ($user && Hash::check($credentials['password'], $user->password)) {
+            // Check if user must change password
+            if ($user->has_to_change_password) {
+                return response()->json([
+                    'message' => 'Password change required',
+                    'require_password_change' => true,
+                    'user' => new UserResource($user),
+                    'token' => $user->createToken('auth_token')->plainTextToken
+                ], 200);
+            }
+
+            $user->load('teams');
+
+            $token = $user->createToken('auth-token')->plainTextToken;
+
             return response()->json([
-                'message' => 'Identifiants invalides',
-            ], 401);
+                'user' => new UserResource($user),
+                'token' => $token,
+            ]);
         }
 
-        $user->load('teams');
-
-        $token = $user->createToken('auth-token')->plainTextToken;
-
+        // If authentication fails
         return response()->json([
-            'user' => new UserResource($user),
-            'token' => $token,
-        ]);
+            'message' => 'Identifiants invalides',
+        ], 401);
     }
 
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Déconnexion réussie',
+        return response()->json(['message' => 'Logged out successfully']);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|confirmed|min:8',
         ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Mot de passe actuel incorrect'], 422);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->has_to_change_password = false;
+        $user->save();
+
+        return response()->json(['message' => 'Mot de passe modifié avec succès']);
     }
 
     public function me(Request $request)
