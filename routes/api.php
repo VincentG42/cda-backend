@@ -16,120 +16,80 @@ Route::post('/contact', [ContactController::class, 'send']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
-// Publicly accessible event routes
+// Routes publiques
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
 
-// TEMPORARY PUBLIC TEST ROUTE - NO AUTH, NO POLICY
-Route::get('/public-test-team-1', function () {
-    $team = \App\Models\Team::find(1);
-    if (! $team) {
-        return response()->json(['message' => 'Team 1 not found in public test'], 404);
-    }
 
-    $teamStatsService = app(\App\Domain\Statistics\Services\TeamStatsService::class);
 
-    $overview = $teamStatsService->getSeasonOverview($team);
-    $analysis = $teamStatsService->getPointsConcededAnalysis($team);
-
-    return response()->json([
-        'overview' => $overview,
-        'analysis' => $analysis,
-    ]);
-});
-
-Route::get('/public-test-team-stats', function () {
-    $team = \App\Models\Team::find(1); // Hardcode team ID 1
-    if (! $team) {
-        return response()->json(['message' => 'Team 1 not found for stats test'], 404);
-    }
-
-    $teamStatsService = app(\App\Domain\Statistics\Services\TeamStatsService::class);
-
-    $overview = $teamStatsService->getSeasonOverview($team);
-    $analysis = $teamStatsService->getPointsConcededAnalysis($team);
-
-    return response()->json([
-        'overview' => $overview,
-        'analysis' => $analysis,
-    ]);
-});
-// END TEMPORARY PUBLIC TEST ROUTE
-
-// Authenticated routes (any user type)
+// Route sous sanctum
 Route::middleware(['auth:sanctum'])->group(function () {
-    // My Profile
+    // Profile
     Route::get('/me', [AuthController::class, 'me']);
-    // My Teams
     Route::get('/me/teams', [AuthController::class, 'myTeams']);
-
-    // My Dashboard
     Route::get('/me/dashboard', [AuthController::class, 'myDashboard']);
-
-    // My Matches
     Route::get('/me/matches', [AuthController::class, 'myMatches']);
 
-    // Player Stats
+    // Stats Joueurs
     Route::get('/players/{user}/stats/averages', [App\Http\Controllers\Api\PlayerStatsController::class, 'getAverages']);
     Route::get('/players/{user}/stats/historical/{stat}', [App\Http\Controllers\Api\PlayerStatsController::class, 'getHistorical'])->where('stat', '[a-zA-Z]+');
     Route::get('/players/{user}/match/{encounter}/stats', [App\Http\Controllers\Api\PlayerStatsController::class, 'getMatchStats']);
 
-    // Team Stats
+    // Stats Equipes
     Route::get('/teams/{team}/stats/overview', [App\Http\Controllers\Api\TeamStatsController::class, 'getOverview']);
     Route::get('/teams/{team}/stats/analysis', [App\Http\Controllers\Api\TeamStatsController::class, 'getAnalysis']);
     Route::get('/teams/{team}/stats/shooting', [App\Http\Controllers\Api\TeamStatsController::class, 'getShooting']);
     Route::get('/teams/{team}/stats/players', [App\Http\Controllers\Api\TeamStatsController::class, 'getPlayersStats']);
     Route::get('/teams/{team}/stats/periods', [App\Http\Controllers\Api\TeamStatsController::class, 'getPeriodStats']);
 
-    // User & Team Resources (accessible by authenticated users, controlled by policies)
+    // infos licenciés et equipes dispos pour le licencié connecté
     Route::apiResource('users', UserController::class)->except(['index', 'store', 'destroy']);
     Route::apiResource('teams', TeamController::class)->except(['index', 'store', 'destroy']);
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Change Password
     Route::post('/auth/change-password', [AuthController::class, 'changePassword']);
 });
 
-// Admin/privileged routes
+// Routes Admin
 Route::middleware(['auth:sanctum', 'can:access-admin-panel'])->group(function () {
 
-    // User
+    // Licenciés
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::post('/users', [UserController::class, 'store']);
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
-    // User Type
+    // Roles
     Route::get('/user-types', [UserTypeController::class, 'index']);
     Route::get('/user-types/{id}', [UserTypeController::class, 'show']);
     Route::post('/user-types', [UserTypeController::class, 'store']);
     Route::put('/user-types/{id}', [UserTypeController::class, 'update']);
     Route::delete('/user-types/{id}', [UserTypeController::class, 'destroy']);
 
-    // Category
+    // Categories
     Route::apiResource('categories', CategoryController::class);
 
-    // Season
+    // Saisons
     Route::apiResource('seasons', SeasonController::class);
 
-    // Team
+    // Equipes
     Route::apiResource('teams', TeamController::class);
     Route::post('teams/{team}/players', [TeamController::class, 'addPlayer'])->name('teams.players.add');
     Route::delete('teams/{team}/players/{player}', [TeamController::class, 'removePlayer'])->name('teams.players.remove');
     Route::post('teams/{team}/coach', [TeamController::class, 'assignCoach'])->name('teams.coach.assign');
 
-    // Event (Admin-only actions)
+    // Evenements (Admin-only actions)
     Route::apiResource('events', EventController::class)->except(['index', 'show']);
 
-    // Encounter
+    // Matchs
     Route::apiResource('encounters', EncounterController::class);
     Route::put('encounters/{encounter}/result', [EncounterController::class, 'updateResult'])->name('encounters.updateResult');
     Route::post('encounters/{encounter}/stats', [EncounterController::class, 'uploadStats'])->name('encounters.stats.upload');
 
-    // Match Recap Import
+    // Import stats macths
     Route::post('/matches/{encounter}/recap/prepare', [App\Http\Controllers\Api\MatchRecapController::class, 'prepareRecap']);
     Route::post('/matches/{encounter}/recap/import', [App\Http\Controllers\Api\MatchRecapController::class, 'importRecap']);
 });

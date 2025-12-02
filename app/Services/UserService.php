@@ -58,6 +58,16 @@ class UserService
 
     public function createUser(CreateUserDTO $dto): User
     {
+        // Security Check: Only Admins can create Admins
+        $targetUserType = \App\Models\UserType::find($dto->userTypeId);
+
+        if ($targetUserType && $targetUserType->name === \App\Models\UserType::ADMIN) {
+            $currentUser = auth()->user();
+            if (! $currentUser || $currentUser->userType->name !== \App\Models\UserType::ADMIN) {
+                abort(403, 'Seuls les administrateurs peuvent créer un compte administrateur.');
+            }
+        }
+
         // Generate a random password
         $password = Str::password(10);
 

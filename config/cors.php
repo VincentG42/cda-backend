@@ -7,7 +7,7 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        env('FRONTEND_URL', 'http://localhost:4321'),
+        env('APP_FRONTEND_URL', 'http://localhost:4321'),
         'http://127.0.0.1:4321',
     ],
 
