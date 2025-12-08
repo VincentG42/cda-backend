@@ -20,8 +20,6 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
 
-
-
 // Route sous sanctum
 Route::middleware(['auth:sanctum'])->group(function () {
     // Profile
