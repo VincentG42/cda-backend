@@ -1,62 +1,166 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Basket Club API (Backend)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API Backend pour l'application de gestion de club de basket. Développée avec **Laravel**, elle gère l'authentification, les données des joueurs, les équipes, les matchs et les statistiques.
 
-## About Laravel
+## 🛠 Tech Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Framework** : Laravel 12.xd
+- **Langage** : PHP 8.2+
+- **Base de données** : MySQL / MariaDBd
+- **Authentification** : Laravel Sanctum (API Tokens)
+- **Documentation API** : Scribe
+- **Environnement de Dev** : DDEV (recommandé) ou Laravel Sail / Serve
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🚀 Installation & Démarrage
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Prérequis
 
-## Learning Laravel
+- [Docker](https://www.docker.com/) & [DDEV](https://ddev.readthedocs.io/) (Recommandé)
+- OU PHP 8.2+ & Composer & MySQL installés localement.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Option 1 : Via DDEV (Recommandé)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+DDEV configure automatiquement Nginx, PHP et MySQL dans des conteneurs isolés.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Cloner le projet**
+   ```bash
+   git clone <url-du-repo>
+   cd backend-basketclub-app
+   ```
 
-## Laravel Sponsors
+2. **Démarrer l'environnement**
+   ```bash
+   ddev start
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+3. **Installer les dépendances & Configurer**
+   ```bash
+   ddev composer install
+   ddev artisan key:generate
+   ```
 
-### Premium Partners
+4. **Migrations & Seed (Données de test)**
+   ```bash
+   ddev artisan migrate --seed
+   ```
+   *Cela créera les tables et des utilisateurs de test (Admin, Coach, Joueur).*
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+5. **Accéder au projet**
+   - URL : `https://backend-basketclub-app.ddev.site` (ou voir la sortie de `ddev describe`)
 
-## Contributing
+### Option 2 : Installation Manuelle (Local sans Docker)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. **Configurer l'environnement**
+   ```bash
+   cp .env.example .env
+   # Editez .env pour configurer votre base de données (DB_HOST, DB_DATABASE, etc.)
+   ```
 
-## Code of Conduct
+2. **Installer les dépendances**
+   ```bash
+   composer install
+   php artisan key:generate
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. **Base de données**
+   Assurez-vous que votre serveur MySQL tourne et que la BDD existe.
+   ```bash
+   php artisan migrate --seed
+   ```
 
-## Security Vulnerabilities
+4. **Lancer le serveur**
+   ```bash
+   php artisan serve
+   ```
+   URL : `http://localhost:8000`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🏗 Architecture & Fonctionnalités Clés
 
-## License
+### Modèles Principaux (`app/Models`)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# cda-backend
+- **User / UserType** : Gestion des utilisateurs (Admins, Coachs, Joueurs).
+- **Team / Category** : Gestion des équipes et catégories d'âge (U11, Senior...).
+- **Season** : Gestion des saisons sportives.
+- **Event / Encounter** : Calendrier, Matchs, et Entraînements.
+- **IndividualStat / EncounterStat** : Statistiques détaillées par joueur et par match.
+
+### API & Routes
+
+Les routes sont définies dans `routes/api.php`. Authentification via **Sanctum** (Bearer Token).
+
+- `POST /login` : Connexion, retourne un token.
+- `GET /user` : Récupère l'utilisateur connecté.
+- `GET /teams`, `GET /encounters` : Ressources publiques ou protégées.
+
+## 📚 Documentation API
+
+La documentation de l'API est générée automatiquement avec **Scribe**.
+
+Pour générer (ou régénérer) la doc HTML locale :
+```bash
+ddev artisan scribe:generate
+```
+La doc sera accessible via une URL locale (ex: `/docs` ou fichier statique dans `public/docs`).
+
+## ✅ Tests
+
+Les tests sont écrits avec **PHPUnit**.
+
+```bash
+# Via DDEV
+ddev artisan test
+
+# Manuel
+php artisan test
+```
+
+## 🚢 Déploiement
+
+
+## 🚢 Déploiement (Production)
+
+### Configuration Serveur (ex: RunCloud)
+
+1. **Type d'app** : Application PHP (Laravel).
+2. **Domaine** : Configurez votre domaine (ex: `api.basketclub.com`).
+3. **Document Root** : `/public`.
+
+### Base de Données
+
+1. Créez une base de données MySQL et un utilisateur sur votre hébergeur.
+2. Ajoutez ces variables dans le `.env` de production :
+   ```bash
+   APP_ENV=production
+   APP_DEBUG=false
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_DATABASE=basketclub_db
+   DB_USERNAME=votre_user
+   DB_PASSWORD=votre_password
+   ```
+
+### Script de Déploiement
+
+Exemple de script à lancer après chaque `git pull` (ou dans "After Install Script" sur RunCloud) :
+
+```bash
+# Installer les dépendances prod
+composer install --no-dev --optimize-autoloader
+
+# Nettoyer les fichiers de dev indésirables (Important)
+rm -rf .ddev tests phpunit.xml
+
+# Mettre à jour la base de données
+php artisan migrate --force
+
+# Optimiser le cache
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+## 🤝 Contribution
+
+1. Respecter les standards PSR-12 (Linting via Laravel Pint : `./vendor/bin/pint`).
+2. Créer une branche pour chaque feature.
+3. Ajouter des tests si nécessaire.
